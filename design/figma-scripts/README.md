@@ -1,41 +1,85 @@
-# Skrip Figma — 4 frame wireframe yang tersisa
+# Skrip Figma — Wireframe v2
 
-Pembangunan wireframe terhenti di frame ke-11 karena **batas panggilan Figma MCP pada plan Starter**.
-Skrip di folder ini menyelesaikan sisanya tanpa perlu menyusun ulang dari nol.
+Menerapkan hasil audit Hallmark ke file Figma: token baru + 12 layar yang dibangun ulang.
 
 File Figma: https://www.figma.com/design/509ex6znf0rrktS8oouOwd
 
-## Sudah berdiri di halaman `Wireframes` (10 frame)
+---
 
-`01 · Onboarding` · `02 · Pilih jam dengar` · `03a · Beranda kosong` · `03b · Beranda terisi` ·
-`04 · Tambah buku (sheet)` · `05 · Tinjau hasil scan` · `06 · Konfirmasi buku` · `07 · Detail buku` ·
-`08 · Recap Sebelumnya` · `09 · Player`
+## Kenapa lewat skrip, bukan langsung
 
-## Yang diselesaikan skrip ini (4 frame)
+Figma MCP membatasi **6 panggilan tool per bulan** untuk plan Starter dengan seat View —
+bukan harian, bukan jendela bergulir. Kuotanya sudah terpakai, jadi menunggu tidak menolong.
 
-| Skrip | Frame | Posisi x |
-|---|---|---|
-| `01-fokus-dan-kuota.js` | `09b · Player · mode fokus` (memakai koleksi **Dark**), `10 · Kuota habis` | 4400, 4840 |
-| `02-pengaturan-dan-notifikasi.js` | `11 · Pengaturan`, `12 · Notifikasi` | 5280, 5720 |
+**Plugin Figma jalan di klien Figma-mu sendiri dan tidak menyentuh kuota MCP sama sekali.**
+Itu jalan keluarnya — tanpa upgrade, tanpa menunggu bulan depan.
 
-Keduanya ditulis sebagai skrip berdiri sendiri — masing-masing memuat ulang font, variabel, dan
-text style, jadi urutan menjalankannya tidak berpengaruh dan aman diulang kalau gagal di tengah.
+---
 
 ## Cara menjalankan
 
-**Opsi A — lewat Claude.** Minta jalankan skrip ini; keduanya masuk ke `use_figma` apa adanya.
-Batas Starter perlu sudah pulih dulu.
+1. Buka file Figma di aplikasi desktop atau browser
+2. Pasang plugin **Scripter** (gratis, cari di Figma Community)
+3. Buka Scripter, tempel isi tiap file, tekan ▶
+4. Jalankan **berurutan**:
 
-**Opsi B — manual lewat Figma plugin console.** Tempel isi skrip ke plugin yang bisa menjalankan
-Plugin API (mis. *Scripter*). Buang baris `return` di akhir kalau plugin-nya tidak menerimanya.
+| Urutan | File | Menghasilkan |
+|---|---|---|
+| 1 | `00-tokens-v2.js` | Nilai warna baru + 13 text style v2 |
+| 2 | `10-layar-01-03b.js` | 01 Onboarding · 02 Pilih jam · 03a Beranda kosong · 03b Beranda terisi |
+| 3 | `11-layar-04-07.js` | 04 Tambah buku · 05 Tinjau scan · 06 Konfirmasi · 07 Detail buku |
+| 4 | `12-layar-08-12.js` | 08 Recap · 09 Player · 09b Mode fokus · 10 Jatah habis · 11 Pengaturan · 12 Notifikasi |
 
-## Catatan kalau nanti dimodifikasi
+`00` wajib duluan — skrip layar mencari text style v2 dan berhenti dengan pesan jelas kalau belum ada.
 
-Tiga jebakan yang sudah menggigit sekali selama pembangunan ini:
+**Semua aman diulang.** Tiap skrip menghapus frame bernama sama sebelum membangun ulang, jadi
+boleh dijalankan berkali-kali. Halaman `Wireframes` (v1) **tidak disentuh** — v2 masuk ke halaman
+baru `Wireframes v2`, supaya bisa dibandingkan berdampingan.
 
-1. **Frame di Figma default-nya berlatar putih.** Setiap `createAutoLayout` / `createFrame` yang
-   tidak diberi fill akan menutupi latar induknya dengan putih. Helper `box()` di skrip ini selalu
-   mengosongkan `fills` — jangan dihapus. Bug ini sempat membuat mode gelap terlihat terbalik.
-2. **`layoutSizing` harus disetel setelah `appendChild`**, bukan sebelum.
-3. **Hindari emoji** — Inter tidak memuatnya dan hasilnya jadi kotak kosong. Pakai glyph yang pasti
-   ada (`← → ✓ ○ ● ⋮ ✕ ▶ ▮ ↺ ↻ ▷ ▸ ⌄ ◀ ✎`) atau kotak abu-abu sebagai penampung ikon.
+### Kalau typeface-nya belum ada
+
+`00-tokens-v2.js` mencari **Literata** dan **Plus Jakarta Sans**. Keduanya ada di Google Fonts
+dan tersedia di Figma. Kalau tidak ketemu, skrip mundur ke pengganti dan **memberi tahu di hasil
+kembaliannya** — tidak diam-diam. Aktifkan fontnya di Figma, lalu jalankan ulang.
+
+---
+
+## Yang berubah dari v1
+
+Audit Hallmark menemukan **4 critical · 6 major · 2 minor**. Temuan terbesar: v1 adalah
+dashboard produktivitas — padahal positioning produknya justru menolak itu.
+
+| Temuan | Perbaikan |
+|---|---|
+| Kontradiksi positioning | Persentase, bar progres, hitungan bab dicabut. Diganti *“tinggal 8 bab lagi”*. Kuota dikeluarkan dari layar player. |
+| Inter-everywhere | Literata (baca) + Plus Jakarta Sans (UI). Dua peran, dua wajah. |
+| Pure black / pure white | Ramp netral dicondongkan hangat. Tidak ada `#ffffff` maupun `#000000`. |
+| Satu ritme di 10 layar | Tiap layar diberi logika komposisi sendiri. |
+| Centred everything | Layar 01, 08, 10 dibuat bias kiri. |
+| Icon-tile feature card | Dua aksi dengan bobot berbeda, bukan kartu kembar. |
+| Tik eyebrow | Label mono-caps disisakan hanya untuk grup Pengaturan. |
+| Tombol lebar penuh di mana-mana | Diganti tautan bergaris di layar yang tidak butuh penekanan. |
+| Suara ikon campur | Semua ikon digambar SVG, stroke 1,5px, ujung bulat. |
+| Card-in-card | Grup dipisah garis rambut, bukan kotak di dalam kotak. |
+| `...` | Diganti elipsis `…`. |
+| Padding seragam | Divariasikan per layar. |
+
+Pratinjau HTML-nya: [`../wireframe-v2.html`](../wireframe-v2.html) — buka di browser,
+font sudah tertanam jadi tidak perlu koneksi.
+
+---
+
+## Kalau nanti skripnya dimodifikasi
+
+Tiga jebakan yang sudah menggigit selama pembangunan ini:
+
+1. **Frame di Figma default-nya berlatar putih.** Helper `box()` selalu mengosongkan `fills` —
+   jangan dilepas. Bug ini sempat membuat mode gelap terlihat seolah token `past`/`future` tertukar,
+   padahal pengikatannya benar.
+2. **`layoutSizing*` harus disetel setelah `appendChild`**, bukan sebelum.
+3. **Jangan pakai emoji atau glyph teks sebagai ikon.** Cakupan simbol tiap font berbeda dan tebal
+   garisnya tidak seragam — itu tell "ikon campur aduk". Pakai `icon()` yang menggambar SVG.
+
+Blok pembuka di `10` / `11` / `12` sengaja diduplikasi — konsol plugin tidak menyimpan state
+antar-eksekusi, jadi tiap skrip harus berdiri sendiri. Kalau pembukanya diubah, ubah di ketiganya.
+Rinciannya di [`_preamble.md`](_preamble.md).
