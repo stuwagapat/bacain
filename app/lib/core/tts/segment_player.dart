@@ -35,6 +35,11 @@ class SegmentPlayer extends ChangeNotifier {
   int _run = 0;
   Completer<void>? _pauseGate;
 
+  /// Dipanggil tiap kali satu kalimat SELESAI dibacakan. Dipakai untuk
+  /// mencatat pemakaian jatah harian — dicatat setelah didengar, bukan saat
+  /// segmen dibuka, supaya membuka lalu menutup tidak memakan jatah.
+  void Function(Sentence sentence)? onSentenceCompleted;
+
   List<Sentence> get sentences => _sentences;
   int get index => _index;
   PlayerStatus get status => _status;
@@ -90,13 +95,16 @@ class SegmentPlayer extends ChangeNotifier {
       _index = i;
       notifyListeners();
 
+      var spoken = true;
       try {
         await engine.speakOne(_sentences[i].text,
             voiceId: _voiceId, rate: _rate);
       } catch (_) {
         // Satu kalimat gagal diucapkan tidak boleh menghentikan seluruh bab.
+        spoken = false;
       }
       if (run != _run) return;
+      if (spoken) onSentenceCompleted?.call(_sentences[i]);
     }
 
     _status = PlayerStatus.finished;
