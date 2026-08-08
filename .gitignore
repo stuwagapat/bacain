@@ -1,2 +1,8 @@
 node_modules/
 package-lock.json
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
