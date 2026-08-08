@@ -47,7 +47,7 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Mode fokus | jalan |
 | Pengaturan | jalan |
 | Mesin bicara Android (flutter_tts) | kode selesai, **belum dicoba di HP** |
-| Build APK lewat GitHub Actions | pipa terpasang, uji lolos di CI |
+| Build APK lewat GitHub Actions | jalan — APK terbangun (±24 MB) |
 
 **73 uji lolos** (`cd app && flutter test`).
 
@@ -236,6 +236,14 @@ sempat didengar utuh.
 9. **Sejak Android 11, daftar suara pulang kosong** tanpa pesan error apa pun
    kalau `<queries>` untuk `TTS_SERVICE` tidak ada di manifest. App akan
    terlihat bisu padahal mesin TTS-nya terpasang normal.
+10. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
+    Di AGP 9 dua paket punya asumsi yang saling bertentangan dan tidak ada
+    nilai `android.builtInKotlin` yang memuaskan keduanya:
+    `false` membuat `file_picker` tidak mengompilasi Kotlin-nya sama sekali
+    (gagal diam-diam, muncul sebagai `cannot find symbol: FilePickerPlugin`
+    di modul lain), sedangkan `true` membuat `flutter_plugin_android_lifecycle`
+    ditolak AGP 9. Keduanya menyematkan AGP 8 di buildscript masing-masing.
+    Jangan menaikkan AGP kembali sebelum kedua paket itu sepakat.
 
 ---
 
