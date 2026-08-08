@@ -46,20 +46,21 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Jatah harian | jalan, teruji |
 | Mode fokus | jalan |
 | Pengaturan | jalan |
+| Mesin bicara Android (flutter_tts) | kode selesai, **belum dicoba di HP** |
+| Build APK lewat GitHub Actions | pipa terpasang, uji lolos di CI |
 
-**69 uji lolos** (`cd app && flutter test`).
+**73 uji lolos** (`cd app && flutter test`).
 
 ### Belum ada
 
 | Belum ada | Kenapa |
 |---|---|
-| Kamera + OCR buku fisik | butuh Android asli (ML Kit on-device) |
-| Notifikasi harian sungguhan | butuh Android asli |
-| Pemutaran di latar belakang | butuh Android asli |
+| Kamera + OCR buku fisik | belum ditulis (ML Kit, on-device) |
+| Notifikasi harian sungguhan | belum ditulis |
+| Pemutaran saat layar mati | butuh foreground service; belum ditulis |
 | Suara AI berkualitas | butuh kredensial Google Cloud TTS |
 | Ringkasan "sebelumnya" yang benar-benar merangkum | butuh Claude API |
 | Impor PDF | jalur EPUB didahulukan |
-| Build Android | butuh Android SDK, dan APK tidak bisa dijalankan di lingkungan ini |
 
 Layar recap **jujur** menampilkan kalimat penutup bagian sebelumnya dan
 menyatakan bahwa ringkasan sungguhan menyusul — tidak mengarang ringkasan.
@@ -95,6 +96,38 @@ rm -rf docs/canvaskit && touch docs/.nojekyll && rm -f docs/.last_build_id
 > tangan di sana — pernah terjadi: `docs/rencana-mvp.md` terhapus saat build
 > pertama, dan harus dipulihkan dari riwayat git. Catatan ditulis di `notes/`.
 
+### APK Android
+
+APK **tidak bisa dibangun di sandbox** tempat kode ini ditulis: `dl.google.com`
+diblokir kebijakan proxy, dan `maven.google.com` cuma redirect ke sana — jadi
+Android SDK, `android.jar`, dan aapt2 semuanya tak terjangkau. Karena itu APK
+dibangun di GitHub Actions, yang runner-nya sudah membawa Android SDK lengkap.
+
+Ambil APK-nya: **Actions → "Bangun APK Android" → run terbaru → Artifacts →
+`bacain-apk`**. Jalan otomatis tiap kali ada perubahan di `app/`, atau bisa
+dipicu manual lewat tombol *Run workflow*.
+
+Di HP: izinkan "pasang dari sumber tak dikenal" untuk aplikasi tempat APK
+dibuka, lalu pasang seperti biasa.
+
+> ⚠️ Selama belum ada kunci penandatanganan tetap, tiap build memakai kunci
+> debug yang **dibuat baru setiap kali**. Tanda tangannya berubah, jadi Android
+> menolak memasang versi baru di atas yang lama — penguji harus menghapus app
+> dulu, dan progres mereka ikut hilang. Bisa dipasang sekali saja untuk
+> mencoba, tapi untuk pengujian berhari-hari kuncinya harus ditetapkan:
+>
+> ```bash
+> keytool -genkey -v -keystore bacain.jks -keyalg RSA \
+>   -keysize 2048 -validity 10000 -alias bacain
+> base64 -w0 bacain.jks        # tempel hasilnya jadi secret
+> ```
+>
+> Lalu isi 4 secret repo (Settings → Secrets and variables → Actions):
+> `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+> `ANDROID_KEY_PASSWORD`. Begitu keempatnya ada, pipa otomatis memakainya.
+> **Simpan `bacain.jks` baik-baik** — kalau hilang, app tidak akan pernah bisa
+> di-update di HP yang sudah memasangnya.
+
 ---
 
 ## 4. Peta repo
@@ -110,16 +143,25 @@ app/                       proyek Flutter
     tts/speech_engine.dart antarmuka mesin bicara + mesin tiruan untuk uji
     tts/segment_player.dart urutan, jeda, lompat, kalimat aktif
     store/                 rak buku, pengaturan, jatah harian
-  lib/platform/            mesin bicara per platform (web / stub Android)
-  lib/screens/             layar
-  lib/ui/tokens.dart       warna & widget bersama
-  test/                    69 uji
+  lib/platform/            mesin bicara per platform
+    web_speech_engine.dart    browser: speechSynthesis
+    native_speech_engine.dart Android: flutter_tts
+  lib/screens/             layar          ← lapisan desain
+  lib/ui/tokens.dart       warna & widget bersama  ← lapisan desain
+  test/                    73 uji
+  android/                 konfigurasi Android (manifest, gradle, penandatanganan)
   assets/contoh.epub       buku contoh, teks tulisan sendiri (bukan berhak cipta)
+.github/workflows/apk.yml  pipa pembangun APK
 docs/                      HASIL BUILD untuk GitHub Pages — jangan diedit tangan
 design/                    token desain, wireframe, skrip Figma
 notes/                     dokumen tulisan tangan (rencana, status ini)
 prototype/                 prototipe HTML halaman 1 (sebelum Flutter)
 ```
+
+**Desain hidup di dua tempat saja**: `lib/ui/tokens.dart` (warna, tipografi,
+widget bersama) dan `lib/screens/` (tata letak tiap layar). Tidak ada satu pun
+warna atau ukuran yang tertanam di `lib/core/` — jadi mengubah desain tidak
+pernah menyentuh logika, dan tidak perlu membangun ulang apa pun selain APK.
 
 ---
 
@@ -148,6 +190,16 @@ ke Android tanpa ditulis ulang.
 **EPUB didahulukan** karena daftar isinya eksplisit: kalau segmentasi salah,
 ketahuan penyebabnya memang segmentasi, bukan OCR yang meleset.
 
+**Mesin bicara melaporkan kemampuannya, bukan platformnya.** Pemutar tidak
+pernah bertanya "ini Android atau web"; ia bertanya `canPauseMidSentence`.
+Android tidak punya jeda sungguhan — `flutter_tts.pause()` sebenarnya
+menghentikan ucapan lalu menyimpan sisa teks di dalam plugin, dan sisa itu ikut
+terbawa ke ucapan berikutnya. Jadi di Android pemutar menjeda dengan cara lain:
+hentikan sekarang juga, ulangi kalimat yang sama dari awal saat dilanjutkan.
+Loop dibatalkan lebih dulu supaya kalimat yang terpotong tidak terhitung
+selesai — kalau tidak, jatah harian ikut terpotong untuk kalimat yang belum
+sempat didengar utuh.
+
 ---
 
 ## 6. Jebakan lingkungan — akan menggigit lagi
@@ -173,6 +225,17 @@ ketahuan penyebabnya memang segmentasi, bukan OCR yang meleset.
    tidak menyentuh kuota MCP.
 6. **Vercel MCP tidak bisa dipakai** untuk app ini: tool deploy-nya menuntut isi
    tiap berkas ditempel di dalam panggilan, sedangkan `main.dart.js` 2,2 MB.
+7. **`dl.google.com` diblokir kebijakan proxy** di sandbox ini, dan
+   `maven.google.com` hanya redirect ke sana. Artinya Android SDK sama sekali
+   tidak bisa diunduh — APK wajib dibangun di GitHub Actions. `pub.dev`,
+   Maven Central, dan Gradle sendiri tetap terjangkau, jadi paket Dart dan
+   `flutter test` tetap bisa dijalankan lokal.
+8. **flutter_tts mengalikan dua nilai kecepatan** sebelum meneruskannya ke
+   Android (`setSpeechRate(rate * 2f)`), sedangkan kecepatan normal di Android
+   adalah 1.0. Kecepatan 1.0× versi kita harus dikirim sebagai **0.5**.
+9. **Sejak Android 11, daftar suara pulang kosong** tanpa pesan error apa pun
+   kalau `<queries>` untuk `TTS_SERVICE` tidak ada di manifest. App akan
+   terlihat bisu padahal mesin TTS-nya terpasang normal.
 
 ---
 
@@ -217,10 +280,19 @@ Semuanya ketahuan dari **menjalankan**, bukan membaca kode:
    Palet asli dari aset: hijau `#2D6B2D`/`#184818`, oranye `#F06C3C`, aprikot
    `#FCB46C`, krem `#EFECE7`. Sudah dipakai di app.
 
+**Yang perlu dicoba di HP sungguhan** — semua ini tidak bisa diverifikasi dari
+sandbox, jadi jangan dianggap beres sampai ada yang mencobanya:
+
+- Suara id-ID muncul di daftar dan terpilih otomatis.
+- Kecepatan 1.0× terdengar normal, bukan dua kali lipat.
+- Tombol jeda berhenti seketika, dan saat dilanjutkan kalimatnya diulang dari
+  awal — bukan melompat ke kalimat berikutnya.
+- Impor EPUB lewat file picker Android.
+
 **Pekerjaan teknis yang jelas berikutnya:**
 
-- Build Android (butuh Android SDK) + `flutter_tts` sebagai `SpeechEngine`
-  kedua.
+- Pemutaran saat layar mati — butuh foreground service. Tanpa ini app tidak
+  terpakai di skenario aslinya: di jalan, sambil beres-beres.
 - Cloud TTS lewat Cloud Function, dengan penegakan kuota di server dan
   **killswitch pagu biaya global** — satu bug perulangan tanpa itu bisa
   menghabiskan tagihan dalam semalam.
