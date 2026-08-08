@@ -40,10 +40,24 @@ class SentenceSplitter {
 
   List<Sentence> split(String text) {
     final out = <Sentence>[];
-    var start = 0;
-    var i = 0;
+    // Batas paragraf SELALU batas kalimat. Tanpa aturan ini, judul bab yang
+    // tidak berakhiran titik menempel ke paragraf pertama dan ikut terbaca
+    // sebagai satu tarikan napas.
+    var pos = 0;
+    for (final m in RegExp(r'\n{2,}').allMatches(text)) {
+      _splitRange(out, text, pos, m.start);
+      pos = m.end;
+    }
+    _splitRange(out, text, pos, text.length);
+    return out;
+  }
 
-    while (i < text.length) {
+  void _splitRange(List<Sentence> out, String text, int from, int to) {
+    if (to <= from) return;
+    var start = from;
+    var i = from;
+
+    while (i < to) {
       final c = text[i];
       final isTerminator = c == '.' || c == '!' || c == '?' || c == '…';
 
@@ -54,7 +68,7 @@ class SentenceSplitter {
 
       // Lahap deretan tanda baca beruntun: "?!", "...", "!)"
       var j = i + 1;
-      while (j < text.length && '.!?…"\')»”'.contains(text[j])) {
+      while (j < to && '.!?…"\')»”'.contains(text[j])) {
         j++;
       }
 
@@ -66,22 +80,22 @@ class SentenceSplitter {
       // Kalimat baru hanya kalau setelahnya ada spasi lalu huruf besar,
       // angka, atau tanda kutip pembuka. Ini yang menjaga "3.14" dan
       // "www.contoh.com" tetap utuh.
-      if (j >= text.length) {
-        _emit(out, text, start, text.length);
-        start = text.length;
+      if (j >= to) {
+        _emit(out, text, start, to);
+        start = to;
         i = j;
         continue;
       }
 
-      final gap = _whitespaceRun(text, j);
+      final gap = _whitespaceRun(text, j, to);
       if (gap == 0) {
         i = j;
         continue;
       }
       final nextIndex = j + gap;
-      if (nextIndex >= text.length) {
-        _emit(out, text, start, text.length);
-        start = text.length;
+      if (nextIndex >= to) {
+        _emit(out, text, start, to);
+        start = to;
         break;
       }
       if (!_startsNewSentence(text[nextIndex])) {
@@ -94,8 +108,7 @@ class SentenceSplitter {
       i = nextIndex;
     }
 
-    if (start < text.length) _emit(out, text, start, text.length);
-    return out;
+    if (start < to) _emit(out, text, start, to);
   }
 
   void _emit(List<Sentence> out, String text, int from, int to) {
@@ -113,9 +126,9 @@ class SentenceSplitter {
     out.add(Sentence(start: s, end: e, text: text.substring(s, e)));
   }
 
-  int _whitespaceRun(String text, int at) {
+  int _whitespaceRun(String text, int at, int to) {
     var n = 0;
-    while (at + n < text.length && _isSpace(text.codeUnitAt(at + n))) {
+    while (at + n < to && _isSpace(text.codeUnitAt(at + n))) {
       n++;
     }
     return n;

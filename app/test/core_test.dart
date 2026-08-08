@@ -110,6 +110,20 @@ void main() {
       expect(out.first.text, 'Dia berkata, "Selesai."');
     });
 
+
+    test('judul bab tidak menempel ke paragraf pertama', () {
+      // Judul tidak berakhiran titik. Tanpa batas paragraf sebagai batas
+      // kalimat, keduanya jadi satu tarikan napas saat dibacakan.
+      final out = s.split('Sebuah Undangan\n\nPada hari itu ia pulang. Lalu tidur.');
+      expect(out.first.text, 'Sebuah Undangan');
+      expect(out.length, 3);
+    });
+
+    test('paragraf berbeda tidak pernah digabung jadi satu kalimat', () {
+      final out = s.split('Satu\n\nDua\n\nTiga');
+      expect(out.map((e) => e.text).toList(), ['Satu', 'Dua', 'Tiga']);
+    });
+
     test('contains() memetakan charIndex ke kalimat yang benar', () {
       const text = 'Satu dua. Tiga empat.';
       final out = s.split(text);
