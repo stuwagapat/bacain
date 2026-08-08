@@ -27,6 +27,11 @@ class WebSpeechEngine implements SpeechEngine {
   @override
   List<VoiceOption> get voices => _voices;
 
+  /// `speechSynthesis.pause()` menahan ucapan di tengah kalimat dan
+  /// melanjutkannya dari titik yang sama.
+  @override
+  bool get canPauseMidSentence => true;
+
   /// Browser mengisi daftar suara secara asinkron; panggilan pertama
   /// `getVoices()` hampir selalu mengembalikan daftar kosong. Jadi dicoba
   /// beberapa kali sebentar-sebentar, bukan sekali lalu menyerah.

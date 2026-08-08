@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="bacain"
+        android:label="Bacain"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -40,6 +40,12 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- WAJIB sejak Android 11 (API 30). Tanpa ini daftar suara pulang
+             KOSONG tanpa pesan error apa pun, dan app terlihat seperti bisu
+             padahal mesin TTS-nya terpasang normal di HP. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
         </intent>
     </queries>
 </manifest>

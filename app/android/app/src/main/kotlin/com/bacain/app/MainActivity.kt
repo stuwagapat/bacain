@@ -1,4 +1,4 @@
-package com.bacain.bacain
+package com.bacain.app
 
 import io.flutter.embedding.android.FlutterActivity
 

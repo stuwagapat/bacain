@@ -151,6 +151,81 @@ void main() {
     expect(player.sentences.length, 2);
     expect(player.status, PlayerStatus.idle);
   });
+
+  group('mesin tanpa jeda sungguhan (Android)', _ujiJedaTanpaJedaSungguhan);
+}
+
+/// Android tidak punya jeda sungguhan: yang ada hanya berhenti. Menunggu
+/// kalimat berjalan sampai habis akan terasa seperti tombolnya rusak, jadi
+/// pemutar menghentikan ucapan sekarang juga lalu mengulang kalimat yang sama
+/// dari awal. Kelompok uji ini yang menjaga perilaku itu.
+void _ujiJedaTanpaJedaSungguhan() {
+  late FakeSpeechEngine engine;
+  late SegmentPlayer player;
+
+  setUp(() {
+    engine = FakeSpeechEngine(canPauseMidSentence: false);
+    player = SegmentPlayer(engine: engine);
+    player.load(_text);
+  });
+
+  test('jeda menghentikan ucapan sekarang juga, tidak menunggu kalimat habis',
+      () async {
+    player.play();
+    await pumpEventQueue();
+    expect(engine.spoken, ['Kalimat satu.']);
+
+    await player.pause();
+    expect(player.status, PlayerStatus.paused);
+    expect(engine.log, contains('stop'),
+        reason: 'harus berhenti, bukan menahan sampai kalimat selesai');
+    expect(engine.log, isNot(contains('pause')),
+        reason: 'flutter_tts.pause() menyimpan sisa teks di dalam plugin '
+            'dan ikut terbawa ke ucapan berikutnya — jangan dipakai');
+  });
+
+  test('lanjut mengulang kalimat yang sama, bukan melompat ke berikutnya',
+      () async {
+    player.play();
+    await pumpEventQueue();
+    await player.pause();
+
+    await player.resume();
+    await pumpEventQueue();
+
+    expect(player.status, PlayerStatus.playing);
+    expect(player.index, 0);
+    expect(engine.spoken, ['Kalimat satu.', 'Kalimat satu.'],
+        reason: 'kalimat yang terpotong diulang utuh, tidak ada isi yang hilang');
+  });
+
+  test('kalimat yang terpotong tidak dihitung selesai', () async {
+    final selesai = <String>[];
+    player.onSentenceCompleted = (s) => selesai.add(s.text);
+
+    player.play();
+    await pumpEventQueue();
+    await player.pause();
+    await pumpEventQueue();
+
+    expect(selesai, isEmpty,
+        reason: 'kalau dihitung selesai, jatah harian terpotong untuk '
+            'kalimat yang belum sempat didengar utuh');
+  });
+
+  test('masih bisa lanjut sampai habis setelah dijeda di tengah', () async {
+    player.play();
+    await pumpEventQueue();
+    await player.pause();
+    await player.resume();
+    await pumpEventQueue();
+
+    for (var i = 0; i < 4; i++) {
+      engine.finishCurrent();
+      await pumpEventQueue();
+    }
+    expect(player.status, PlayerStatus.finished);
+  });
 }
 
 /// Mesin yang menggagalkan satu kalimat tertentu, untuk memastikan kegagalan
@@ -162,6 +237,8 @@ class _ThrowingEngine implements SpeechEngine {
 
   @override
   List<VoiceOption> get voices => const [];
+  @override
+  bool get canPauseMidSentence => true;
   @override
   Future<void> init() async {}
   @override

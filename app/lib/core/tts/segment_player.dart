@@ -35,6 +35,11 @@ class SegmentPlayer extends ChangeNotifier {
   int _run = 0;
   Completer<void>? _pauseGate;
 
+  /// Menyala kalau jeda terpaksa dilakukan dengan menghentikan ucapan, karena
+  /// mesinnya tidak bisa menahan di tengah kalimat (Android). Saat dilanjutkan,
+  /// kalimat yang sama diulang dari awal.
+  bool _pausedByStopping = false;
+
   /// Dipanggil tiap kali satu kalimat SELESAI dibacakan. Dipakai untuk
   /// mencatat pemakaian jatah harian — dicatat setelah didengar, bukan saat
   /// segmen dibuka, supaya membuka lalu menutup tidak memakan jatah.
@@ -113,6 +118,25 @@ class SegmentPlayer extends ChangeNotifier {
 
   Future<void> pause() async {
     if (_status != PlayerStatus.playing) return;
+
+    if (!engine.canPauseMidSentence) {
+      // Android tidak punya jeda sungguhan. Menunggu kalimat ini habis dulu
+      // akan terasa seperti tombolnya rusak, jadi ucapan dihentikan sekarang
+      // juga dan kalimat yang sama diulang dari awal saat dilanjutkan.
+      //
+      // Loop dibatalkan LEBIH DULU supaya kalimat yang terpotong tidak
+      // terhitung selesai — kalau tidak, jatah harian ikut terpotong untuk
+      // kalimat yang belum sempat didengar utuh.
+      final at = _index < 0 ? 0 : _index;
+      _stopInternal();
+      _pausedByStopping = true;
+      _index = at;
+      _status = PlayerStatus.paused;
+      notifyListeners();
+      await engine.stop();
+      return;
+    }
+
     _pauseGate ??= Completer<void>();
     _status = PlayerStatus.paused;
     notifyListeners();
@@ -121,6 +145,15 @@ class SegmentPlayer extends ChangeNotifier {
 
   Future<void> resume() async {
     if (_status != PlayerStatus.paused) return;
+
+    if (_pausedByStopping) {
+      _pausedByStopping = false;
+      _status = PlayerStatus.playing;
+      notifyListeners();
+      unawaited(play(from: _index < 0 ? 0 : _index));
+      return;
+    }
+
     _status = PlayerStatus.playing;
     notifyListeners();
     await engine.resume();
@@ -168,6 +201,7 @@ class SegmentPlayer extends ChangeNotifier {
 
   void _stopInternal() {
     _run++;
+    _pausedByStopping = false;
     final gate = _pauseGate;
     _pauseGate = null;
     if (gate != null && !gate.isCompleted) gate.complete();

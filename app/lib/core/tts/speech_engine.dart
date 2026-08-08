@@ -37,6 +37,14 @@ abstract class SpeechEngine {
   /// dibacakan, dibatalkan, atau gagal.
   Future<void> speakOne(String text, {String? voiceId, double rate = 1.0});
 
+  /// Apakah mesin ini bisa menahan ucapan DI TENGAH kalimat lalu
+  /// melanjutkannya dari titik yang sama.
+  ///
+  /// Web bisa (`speechSynthesis.pause()`). Android tidak: di sana tidak ada
+  /// jeda sungguhan, yang ada hanya berhenti. Pemutar memakai keterangan ini
+  /// untuk memilih cara menjeda — bukan untuk mematikan tombolnya.
+  bool get canPauseMidSentence => true;
+
   Future<void> pause();
   Future<void> resume();
 
@@ -50,10 +58,17 @@ abstract class SpeechEngine {
 /// Mesin tiruan untuk uji. Tidak berbunyi; hanya menyelesaikan ucapan saat
 /// diminta, supaya alur pemutar bisa diperiksa langkah demi langkah.
 class FakeSpeechEngine implements SpeechEngine {
+  /// [canPauseMidSentence] bisa dimatikan untuk meniru Android, supaya cara
+  /// menjeda di sana ikut teruji tanpa perlu HP.
+  FakeSpeechEngine({this.canPauseMidSentence = true});
+
   final List<String> spoken = [];
   final List<String> log = [];
   Completer<void>? _current;
   var _stopped = false;
+
+  @override
+  final bool canPauseMidSentence;
 
   @override
   List<VoiceOption> get voices =>
