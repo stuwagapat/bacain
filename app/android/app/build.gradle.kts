@@ -28,6 +28,11 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Dituntut oleh flutter_local_notifications: paket itu memakai API
+        // java.time, yang baru ada di Android 8+. Desugaring menambalnya
+        // untuk versi yang lebih lama. Tanpa ini build berhenti di
+        // checkReleaseAarMetadata dengan pesan yang menyebut nama paketnya.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -68,6 +73,10 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {
