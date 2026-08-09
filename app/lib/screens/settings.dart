@@ -42,10 +42,16 @@ class SettingsPage extends StatelessWidget {
                 activeThumbColor: green,
                 title: const Text('Notifikasi'),
                 subtitle: Text(
-                    'Pengingat sungguhan menyusul di versi Android.',
+                    'Satu pengingat sehari. Di web tidak ada — notifikasi '
+                    'browser cuma hidup selama tab-nya terbuka.',
                     style: bodyStyle.copyWith(fontSize: 12.5)),
-                onChanged: (v) =>
-                    state.updateSettings(s.copyWith(reminderOn: v)),
+                // Izin diminta saat DINYALAKAN, bukan saat app pertama dibuka.
+                // Menodong izin di layar pertama sebelum user tahu gunanya
+                // adalah cara tercepat untuk ditolak permanen.
+                onChanged: (v) async {
+                  if (v) await state.reminders.requestPermission();
+                  await state.updateSettings(s.copyWith(reminderOn: v));
+                },
               ),
               _slider(
                 key: const Key('set-quota'),

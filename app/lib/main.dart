@@ -5,6 +5,7 @@ import 'app_state.dart';
 import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
 import 'core/tts/segment_player.dart';
+import 'platform/reminders.dart';
 import 'platform/speech_engine_factory.dart';
 import 'screens/book.dart';
 import 'screens/library.dart';
@@ -21,6 +22,7 @@ void main() {
     store: PrefsLibraryStore(),
     settingsStore: PrefsSettingsStore(),
     player: SegmentPlayer(engine: createSpeechEngine()),
+    reminders: createReminders(),
   );
   runApp(BacainApp(state: state));
 }

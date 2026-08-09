@@ -14,6 +14,8 @@ import 'package:flutter/foundation.dart';
 import 'core/epub/epub_reader.dart';
 import 'core/model/book.dart';
 import 'core/pdf/pdf_reader.dart';
+import 'core/reminders/reminder_plan.dart';
+import 'core/reminders/reminders.dart';
 import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
 import 'core/text/segmenter.dart';
@@ -27,6 +29,8 @@ class AppState extends ChangeNotifier {
   final EpubReader reader;
   final PdfReader pdfReader;
   final Segmenter segmenter;
+  final Reminders reminders;
+  final ReminderPlanner planner;
   final DateTime Function() clock;
 
   AppState({
@@ -36,8 +40,11 @@ class AppState extends ChangeNotifier {
     this.reader = const EpubReader(),
     this.pdfReader = const PdfReader(),
     this.segmenter = const Segmenter(),
+    Reminders? reminders,
+    this.planner = const ReminderPlanner(),
     DateTime Function()? clock,
-  }) : clock = clock ?? DateTime.now {
+  })  : clock = clock ?? DateTime.now,
+        reminders = reminders ?? NoopReminders() {
     quota = QuotaTracker(clock: this.clock);
     player.addListener(_onPlayerChanged);
     player.onSentenceCompleted = _onSentenceCompleted;
@@ -115,6 +122,43 @@ class AppState extends ChangeNotifier {
 
     _busy = false;
     notifyListeners();
+    await syncReminders();
+  }
+
+  /// Jadwal pengingat ditulis ulang tiap kali sesuatu yang memengaruhinya
+  /// berubah: jam, tombol pengingat, buku yang sedang dibaca, atau progresnya.
+  /// Selalu menimpa seluruh jadwal — menambah akan menumpuk diam-diam.
+  ///
+  /// Dijadwalkan beberapa hari ke depan sekaligus supaya kalimatnya tetap
+  /// berganti walau app-nya lama tidak dibuka.
+  Future<void> syncReminders() async {
+    if (!_settings.reminderOn) {
+      await reminders.cancelAll();
+      return;
+    }
+    final book = _nextUp;
+    await reminders.replaceAll(planner.plan(
+      clock(),
+      _settings,
+      bookTitle: book?.title,
+      segmentTitle: book?.nextSegmentTitle,
+      minutes: _settings.dailyMinutes,
+    ));
+  }
+
+  /// Buku yang paling wajar dilanjutkan: yang terakhir didengar dan belum
+  /// tamat. Dipakai untuk menyebut nama buku di teks pengingat.
+  StoredBook? get _nextUp {
+    final belum = _books.where((b) => !b.isFinished).toList();
+    if (belum.isEmpty) return null;
+    belum.sort((a, b) {
+      final ta = a.lastListenedAt, tb = b.lastListenedAt;
+      if (ta == null && tb == null) return 0;
+      if (ta == null) return 1;
+      if (tb == null) return -1;
+      return tb.compareTo(ta);
+    });
+    return belum.first;
   }
 
   // ── pengaturan ───────────────────────────────────────────────────
@@ -125,6 +169,7 @@ class AppState extends ChangeNotifier {
     if (next.voiceId != null) player.setVoice(next.voiceId);
     await settingsStore.saveSettings(next);
     notifyListeners();
+    await syncReminders();
   }
 
   Future<void> completeOnboarding({
@@ -215,6 +260,9 @@ class AppState extends ChangeNotifier {
     _books = [stored, ..._books];
     await store.save(_books);
     notifyListeners();
+    // Pengingat menyebut nama buku, jadi harus ikut berubah begitu raknya
+    // berubah — kalau tidak, teksnya masih menyebut rak kosong.
+    await syncReminders();
     return stored;
   }
 
@@ -258,6 +306,7 @@ class AppState extends ChangeNotifier {
     }
     await store.save(_books);
     notifyListeners();
+    await syncReminders();
   }
 
   // ── jatah harian ─────────────────────────────────────────────────

@@ -42,6 +42,15 @@ class StoredBook {
 
   bool get isFinished => lastFinishedIndex >= segments.length - 1;
 
+  /// Judul bagian yang akan didengar berikutnya. Dipakai di teks pengingat —
+  /// menyebut bagian yang sudah selesai akan terasa seperti app-nya tidak
+  /// mengikuti.
+  String? get nextSegmentTitle {
+    final next = lastFinishedIndex + 1;
+    if (next < 0 || next >= segments.length) return null;
+    return segments[next].title;
+  }
+
   int get remainingCount => segments.length - (lastFinishedIndex + 1);
 
   /// Berapa lama sejak terakhir mendengar. Dipakai untuk memutuskan apakah
