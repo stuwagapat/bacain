@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'core/epub/epub_reader.dart';
 import 'core/model/book.dart';
 import 'core/pdf/pdf_reader.dart';
+import 'core/playback/keep_awake.dart';
 import 'core/reminders/reminder_plan.dart';
 import 'core/reminders/reminders.dart';
 import 'core/store/library_store.dart';
@@ -31,6 +32,7 @@ class AppState extends ChangeNotifier {
   final Segmenter segmenter;
   final Reminders reminders;
   final ReminderPlanner planner;
+  final KeepAwake keepAwake;
   final DateTime Function() clock;
 
   AppState({
@@ -41,10 +43,12 @@ class AppState extends ChangeNotifier {
     this.pdfReader = const PdfReader(),
     this.segmenter = const Segmenter(),
     Reminders? reminders,
+    KeepAwake? keepAwake,
     this.planner = const ReminderPlanner(),
     DateTime Function()? clock,
   })  : clock = clock ?? DateTime.now,
-        reminders = reminders ?? NoopReminders() {
+        reminders = reminders ?? NoopReminders(),
+        keepAwake = keepAwake ?? NoopKeepAwake() {
     quota = QuotaTracker(clock: this.clock);
     player.addListener(_onPlayerChanged);
     player.onSentenceCompleted = _onSentenceCompleted;
@@ -331,6 +335,7 @@ class AppState extends ChangeNotifier {
   void _onPlayerChanged() {
     final b = _active;
     if (b == null) return;
+    _syncKeepAwake(b);
     if (player.status == PlayerStatus.playing) {
       b.lastListenedAt = clock();
     }
@@ -342,8 +347,28 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Layanan latar depan hanya hidup selagi benar-benar membacakan. Dijeda,
+  /// selesai, atau berhenti — layanannya ikut mati, supaya tidak ada
+  /// notifikasi menggantung yang mengaku sedang membacakan padahal tidak.
+  bool _awake = false;
+
+  void _syncKeepAwake(StoredBook book) {
+    final perlu = player.status == PlayerStatus.playing;
+    if (perlu == _awake) return;
+    _awake = perlu;
+    if (perlu) {
+      keepAwake.start(
+        title: book.title,
+        text: book.currentSegment?.title ?? 'Sedang membacakan',
+      );
+    } else {
+      keepAwake.stop();
+    }
+  }
+
   @override
   void dispose() {
+    keepAwake.stop();
     player.removeListener(_onPlayerChanged);
     player.onSentenceCompleted = null;
     super.dispose();

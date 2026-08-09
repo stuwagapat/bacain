@@ -2,6 +2,10 @@
     <!-- Pengingat harus dipasang ulang setelah HP dinyalakan ulang; tanpa ini
          jadwalnya hilang diam-diam dan user mengira app-nya berhenti bekerja. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Sejak Android 14 jenis layanan latar depan harus disebutkan, dan tiap
+         jenis punya izinnya sendiri. Yang dikerjakan di sini memang pemutaran
+         suara: menjaga bacaan tetap jalan saat layar mati. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <application
         android:label="Bacain"
         android:name="${applicationName}"
@@ -33,6 +37,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Layanan ini tidak dideklarasikan oleh paketnya; app yang wajib
+             menyatakannya beserta jenisnya. -->
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false"/>
 
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
