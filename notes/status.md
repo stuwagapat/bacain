@@ -248,6 +248,9 @@ sempat didengar utuh.
 
 Ada dua jalur, dan bedanya soal keamanan, bukan kualitas.
 
+Langkah menyiapkan kuncinya di Google Cloud Console ada di
+[`menyalakan-suara-ai.md`](menyalakan-suara-ai.md).
+
 **Untuk menilai suaranya (sekarang):** Pengaturan → Suara AI → tempel API key
 Google. Kuncinya diketik user, disimpan di perangkatnya, tidak pernah ikut
 dikompilasi. Begitu tersambung, daftar "Suara pembaca" berisi suara Indonesia
