@@ -81,6 +81,12 @@ class WebSpeechEngine implements SpeechEngine {
     }
     u.rate = rate;
 
+    // `cancel()` di Chrome TIDAK mencabut keadaan "paused". Kalau user menjeda
+    // lalu mengetuk kalimat lain, ucapan baru masuk antrean tapi tidak pernah
+    // berbunyi — dan `onend`-nya juga tidak pernah datang. Pemutar tampak
+    // hidup tapi bisu, lalu maju sendiri tiap kali penjaga waktu habis.
+    if (_synth.paused) _synth.resume();
+
     final completer = Completer<void>();
     _pending = completer;
     _utterance = u;
@@ -122,6 +128,23 @@ class WebSpeechEngine implements SpeechEngine {
     _synth.cancel();
     // `cancel()` memicu onend; kalau tidak, ini yang membebaskan penunggu.
     _finish();
+    await _settleAfterCancel();
+  }
+
+  /// Menunggu Chrome benar-benar membereskan antrean setelah `cancel()`.
+  ///
+  /// Memanggil `speak()` terlalu cepat sesudah `cancel()` membuat ucapan
+  /// berikutnya tidak pernah mulai — bug lama Chrome yang belum hilang. Ini
+  /// jalur yang dilewati tiap kali user mengetuk kalimat untuk melompat, jadi
+  /// akibatnya persis: pemutar berhenti membaca padahal statusnya "memutar".
+  ///
+  /// Ditunggu sampai mesinnya benar-benar diam, bukan dijeda sekian milidetik
+  /// asal-asalan — batas 500 ms hanya supaya tidak menggantung selamanya.
+  Future<void> _settleAfterCancel() async {
+    for (var i = 0; i < 20; i++) {
+      if (!_synth.speaking && !_synth.pending) return;
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
   }
 
   bool get isStopping => _stopping;

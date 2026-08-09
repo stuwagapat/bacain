@@ -289,7 +289,14 @@ class _PlayerPageState extends State<PlayerPage> {
               final past = i < player.index;
               return GestureDetector(
                 key: active ? _activeKey : null,
-                onTap: () => player.seekTo(i),
+                // Menggulir sendiri setelah user MENGETUK kalimat itu salah:
+                // dia sudah tahu di mana kalimatnya, dan layar yang bergeser
+                // sendiri terasa seperti tekannya meleset. Penanda gulir
+                // dimajukan lebih dulu supaya lompatan ini tidak diikuti.
+                onTap: () {
+                  _lastScrolled = i;
+                  player.seekTo(i);
+                },
                 child: Container(
                   width: double.infinity,
                   padding:
@@ -307,7 +314,12 @@ class _PlayerPageState extends State<PlayerPage> {
                       fontSize: fontSize,
                       height: 1.62,
                       color: active ? ink : (past ? ink3 : const Color(0xFF3A3A34)),
-                      fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                      // Tebal huruf sengaja TIDAK berubah saat kalimat aktif.
+                      // Huruf tebal lebih lebar, jadi pemenggalan barisnya ikut
+                      // berubah dan seluruh teks di bawahnya bergeser tiap kali
+                      // kalimat berpindah. Penandanya sudah cukup lewat latar
+                      // oranye, garis kiri, dan warna teks yang lebih pekat.
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),

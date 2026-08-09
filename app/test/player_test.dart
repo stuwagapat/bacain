@@ -152,6 +152,60 @@ void main() {
     expect(player.status, PlayerStatus.idle);
   });
 
+  // Mengetuk kalimat adalah SATU-SATUNYA jalur yang menghentikan mesin lalu
+  // langsung menyuruhnya bicara lagi. Kalau lompatannya tidak benar-benar
+  // melanjutkan pembacaan, pemutar tampak hidup tapi bisu.
+  test('mengetuk kalimat saat dijeda kembali membacakan dari kalimat itu',
+      () async {
+    player.play();
+    await pumpEventQueue();
+    await player.pause();
+    expect(player.status, PlayerStatus.paused);
+
+    await player.seekTo(2);
+    await pumpEventQueue();
+
+    expect(player.status, PlayerStatus.playing,
+        reason: 'lompat harus melanjutkan, bukan berhenti di tempat');
+    expect(player.index, 2);
+    expect(engine.spoken.last, 'Kalimat tiga.');
+  });
+
+  test('mengetuk kalimat saat sudah selesai memutar ulang dari kalimat itu',
+      () async {
+    final done = player.play();
+    await pumpEventQueue();
+    for (var i = 0; i < 4; i++) {
+      engine.finishCurrent();
+      await pumpEventQueue();
+    }
+    await done;
+    expect(player.status, PlayerStatus.finished);
+
+    await player.seekTo(1);
+    await pumpEventQueue();
+    expect(player.status, PlayerStatus.playing);
+    expect(player.index, 1);
+    expect(engine.spoken.last, 'Kalimat dua.');
+  });
+
+  test('mengetuk beruntun tidak meninggalkan pembacaan ganda', () async {
+    player.play();
+    await pumpEventQueue();
+
+    await player.seekTo(1);
+    await player.seekTo(3);
+    await pumpEventQueue();
+
+    expect(player.index, 3);
+    final sebelum = engine.spoken.length;
+    // Kalau ada loop lama yang selamat, kalimat berikutnya akan diucapkan
+    // dua kali dari satu penyelesaian.
+    engine.finishCurrent();
+    await pumpEventQueue();
+    expect(engine.spoken.length - sebelum, lessThanOrEqualTo(1));
+  });
+
   group('mesin tanpa jeda sungguhan (Android)', _ujiJedaTanpaJedaSungguhan);
 }
 
