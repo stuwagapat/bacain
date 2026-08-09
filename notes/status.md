@@ -54,7 +54,7 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Kamera + OCR buku fisik | jalan, sudah dicoba di HP |
 | Suara AI (Google Cloud TTS) | jalur selesai, **menunggu kredensial** |
 
-**134 uji lolos** (`cd app && flutter test`).
+**142 uji lolos** (`cd app && flutter test`).
 
 > ⚠️ Baris "belum dicoba di HP" **tidak boleh dianggap beres**. Semuanya
 > khusus Android dan nol kemungkinan diverifikasi dari sandbox ini — yang
@@ -93,7 +93,7 @@ Dilayani GitHub Pages dari branch `claude/app-pembaca-buku-ai-du5dtq`, folder
 ```bash
 export PATH=/opt/flutter/bin:$PATH
 cd app
-flutter test                 # 134 uji
+flutter test                 # 142 uji
 flutter run -d chrome        # jalankan
 ```
 
@@ -161,6 +161,7 @@ app/                       proyek Flutter
     tts/cloud_speech_engine.dart  mesin bicara ketiga: Google Cloud TTS
     tts/google_tts_client.dart    HTTP ke Google atau ke server sendiri
     tts/tts_budget.dart       pagu karakter harian — penjaga tagihan
+    build_config.dart         nilai yang ditanam saat build (--dart-define)
     tts/speech_engine.dart antarmuka mesin bicara + mesin tiruan untuk uji
     tts/segment_player.dart urutan, jeda, lompat, kalimat aktif
     store/                 rak buku, pengaturan, jatah harian
@@ -174,7 +175,7 @@ app/                       proyek Flutter
     file_audio_cache.dart     cache audio di penyimpanan perangkat
   lib/screens/             layar          ← lapisan desain
   lib/ui/tokens.dart       warna & widget bersama  ← lapisan desain
-  test/                    134 uji
+  test/                    142 uji
   android/                 konfigurasi Android (manifest, gradle, penandatanganan)
   assets/contoh.epub       buku contoh, teks tulisan sendiri (bukan berhak cipta)
 .github/workflows/apk.yml  pipa pembangun APK
@@ -251,20 +252,23 @@ Ada dua jalur, dan bedanya soal keamanan, bukan kualitas.
 Langkah menyiapkan kuncinya di Google Cloud Console ada di
 [`menyalakan-suara-ai.md`](menyalakan-suara-ai.md).
 
-**Untuk menilai suaranya (sekarang):** Pengaturan → Suara AI → tempel API key
-Google. Kuncinya diketik user, disimpan di perangkatnya, tidak pernah ikut
-dikompilasi. Begitu tersambung, daftar "Suara pembaca" berisi suara Indonesia
-sungguhan — Chirp3 HD di atas, lalu Neural2, lalu WaveNet — dan memilih salah
-satu langsung memperdengarkan contohnya.
+**Untuk menilai suaranya (sekarang):** isi secret repo `BACAIN_TTS_KEY`
+dengan API key Google, lalu bangun APK. Kuncinya ditanam saat build lewat
+`--dart-define` — tidak ada yang perlu diketik di HP, dan tidak ada kunci di
+kode sumber. Begitu app dibuka, daftar "Suara pembaca" sudah berisi suara
+Indonesia sungguhan: Chirp3 HD di atas, lalu Neural2, lalu WaveNet.
 
-> ⚠️ Kunci yang dipasang di app ikut terbawa dalam APK. Siapa pun yang
-> memegang APK bisa mengambilnya dan memakainya atas tagihanmu. Pakai untuk
-> menilai, lalu **hapus kuncinya sebelum APK dibagikan.**
+Kolom isian di Pengaturan tetap ada untuk mencoba kunci lain tanpa membangun
+ulang. Yang diketik menang atas yang ditanam; dikosongkan kembali ke bawaan.
 
-**Untuk dibagikan (nanti):** terbitkan `server/` ke Cloud Run, lalu tempel
-alamatnya ke kolom "Alamat server". Kuncinya tinggal di server. Kata sandi
-server bisa dititipkan langsung di URL-nya: `https://…/tts?s=RAHASIA`.
-Petunjuk lengkapnya di [`../server/README.md`](../server/README.md).
+> ⚠️ Ditanam saat build **tetap ikut ke dalam APK.** Tidak ada di kode sumber
+> bukan berarti tidak bisa diambil. Hapus secret `BACAIN_TTS_KEY` dan bangun
+> ulang sebelum APK dibagikan.
+
+**Untuk dibagikan (nanti):** terbitkan `server/` ke Cloud Run, ganti secret-nya
+jadi `BACAIN_TTS_URL`, hapus `BACAIN_TTS_KEY`. App otomatis memakai server —
+tidak ada kode yang berubah. Kata sandi server bisa dititipkan di URL-nya:
+`https://…/tts?s=RAHASIA`. Petunjuknya di [`../server/README.md`](../server/README.md).
 
 **Penjaga biaya, tiga lapis:**
 

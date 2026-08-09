@@ -18,6 +18,17 @@ jobs:
     # keberadaannya dititipkan lewat env tingkat job.
     env:
       ADA_KUNCI: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      # Kredensial suara AI ditanam saat build, jadi tidak ada yang perlu
+      # diketik di HP. Nilainya datang dari Secrets — tidak pernah ada di
+      # kode sumber maupun riwayat git.
+      #
+      # Isi SALAH SATU di Settings → Secrets and variables → Actions:
+      #   BACAIN_TTS_URL  alamat server sendiri. Kunci Google tinggal di
+      #                   server, tidak ikut ke APK. Ini yang aman dibagikan.
+      #   BACAIN_TTS_KEY  kunci Google langsung. Untuk build milik sendiri
+      #                   saat menilai suara — APK-nya jangan dibagikan.
+      TTS_URL: ${{ secrets.BACAIN_TTS_URL }}
+      TTS_KEY: ${{ secrets.BACAIN_TTS_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -68,7 +79,11 @@ jobs:
       # cocok untuk HP-nya.
       - name: Bangun APK
         working-directory: app
-        run: flutter build apk --release --build-number ${{ github.run_number }}
+        run: |
+          flutter build apk --release \
+            --build-number ${{ github.run_number }} \
+            --dart-define=BACAIN_TTS_URL="$TTS_URL" \
+            --dart-define=BACAIN_TTS_KEY="$TTS_KEY"
 
       - name: Bersihkan kunci
         if: always()

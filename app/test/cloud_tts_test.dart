@@ -202,6 +202,56 @@ void main() {
       await berjalan;
     });
 
+    test('pesan kesalahan layanan disimpan, bukan ditelan', () async {
+      // Tanpa ini, kunci salah / billing belum aktif / API belum diaktifkan
+      // terlihat sama persis dari layar: "tidak terjadi apa-apa".
+      final gagal = _ClientGagal(
+          TtsException('API key not valid. Please pass a valid API key.'));
+      engine = CloudSpeechEngine(
+        client: gagal,
+        cache: cache,
+        sink: sink,
+        budget: TtsBudget(),
+        fallback: cadangan,
+      );
+      await engine.init();
+
+      expect(engine.usingFallback, isTrue);
+      expect(engine.lastError, contains('API key not valid'));
+    });
+
+    test('tersambung tapi tanpa suara Indonesia dilaporkan, bukan didiamkan',
+        () async {
+      engine = CloudSpeechEngine(
+        client: _ClientTanpaSuaraIndo(),
+        cache: cache,
+        sink: sink,
+        budget: TtsBudget(),
+        fallback: cadangan,
+      );
+      await engine.init();
+      expect(engine.usingFallback, isTrue);
+      expect(engine.lastError, isNotNull);
+    });
+
+    test('kesalahan hilang setelah berhasil', () async {
+      final gagal = _ClientGagal(TtsException('sedang bermasalah'));
+      engine = CloudSpeechEngine(
+        client: gagal,
+        cache: cache,
+        sink: sink,
+        budget: TtsBudget(),
+        fallback: cadangan,
+      );
+      await engine.init();
+      expect(engine.lastError, isNotNull);
+
+      gagal.pulih = true;
+      await engine.init();
+      expect(engine.lastError, isNull);
+      expect(engine.usingFallback, isFalse);
+    });
+
     test('tanpa kredensial langsung memakai suara sistem', () async {
       engine = CloudSpeechEngine(
         client: FakeClient(configured: false),
@@ -382,4 +432,49 @@ void main() {
       );
     });
   });
+}
+
+
+/// Klien yang selalu gagal sampai [pulih] dinyalakan.
+class _ClientGagal implements TtsClient {
+  _ClientGagal(this.kesalahan);
+
+  final TtsException kesalahan;
+  bool pulih = false;
+
+  @override
+  bool get configured => true;
+
+  @override
+  Future<List<CloudVoice>> voices() async {
+    if (pulih) {
+      return const [
+        CloudVoice(id: 'id-ID-Wavenet-A', lang: 'id-ID', gender: 'FEMALE'),
+      ];
+    }
+    throw kesalahan;
+  }
+
+  @override
+  Future<Uint8List> synthesize(String text,
+      {required String voiceId, double rate = 1.0}) async {
+    if (pulih) return audio(text);
+    throw kesalahan;
+  }
+}
+
+/// Tersambung baik-baik saja, tapi tidak punya suara Bahasa Indonesia.
+class _ClientTanpaSuaraIndo implements TtsClient {
+  @override
+  bool get configured => true;
+
+  @override
+  Future<List<CloudVoice>> voices() async => const [
+        CloudVoice(id: 'en-US-Wavenet-A', lang: 'en-US', gender: 'FEMALE'),
+      ];
+
+  @override
+  Future<Uint8List> synthesize(String text,
+          {required String voiceId, double rate = 1.0}) async =>
+      audio(text);
 }

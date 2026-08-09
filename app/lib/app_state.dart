@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import 'core/build_config.dart';
 import 'core/epub/epub_reader.dart';
 import 'core/model/book.dart';
 import 'core/pdf/pdf_reader.dart';
@@ -39,6 +40,13 @@ class AppState extends ChangeNotifier {
   final KeepAwake keepAwake;
   final PageScanner scanner;
   final ScanImport scanImport;
+
+  /// Kredensial yang ditanam saat build. Yang diketik user di Pengaturan
+  /// menang atas ini — supaya build resmi bisa ditimpa saat mencoba kunci
+  /// lain tanpa membangun ulang.
+  final String bakedTtsProxyUrl;
+  final String bakedTtsApiKey;
+
   final DateTime Function() clock;
 
   AppState({
@@ -53,6 +61,8 @@ class AppState extends ChangeNotifier {
     PageScanner? scanner,
     this.scanImport = const ScanImport(),
     this.planner = const ReminderPlanner(),
+    this.bakedTtsProxyUrl = BuildConfig.ttsProxyUrl,
+    this.bakedTtsApiKey = BuildConfig.ttsApiKey,
     DateTime Function()? clock,
   })  : clock = clock ?? DateTime.now,
         reminders = reminders ?? NoopReminders(),
@@ -184,6 +194,17 @@ class AppState extends ChangeNotifier {
     await syncReminders();
   }
 
+  /// Menyambungkan ulang ke layanan suara, apa pun keadaannya.
+  ///
+  /// Perlu terpisah karena `updateSettings` hanya menyambung ulang saat
+  /// kredensialnya BERUBAH. Tanpa ini, menekan "Sambungkan" setelah gagal —
+  /// tanpa mengubah apa pun — tidak melakukan apa-apa, dan itu persis gejala
+  /// yang paling membingungkan.
+  Future<void> reconnectTts() async {
+    await _applyTtsConfig();
+    notifyListeners();
+  }
+
   /// Menyalakan mesin bicara dengan kredensial yang tersimpan, lalu memilih
   /// suara. Dipanggil saat app dibuka dan tiap kali kredensialnya berubah.
   Future<void> _applyTtsConfig() async {
@@ -191,32 +212,47 @@ class AppState extends ChangeNotifier {
     if (engine is CloudSpeechEngine) {
       final client = engine.client;
       if (client is GoogleTtsClient) {
-        client.proxyUrl = _settings.ttsProxyUrl;
-        client.apiKey = _settings.ttsApiKey;
+        client.proxyUrl = _pilih(_settings.ttsProxyUrl, bakedTtsProxyUrl);
+        client.apiKey = _pilih(_settings.ttsApiKey, bakedTtsApiKey);
       }
     }
 
     await player.engine.init();
-    _pickVoice();
+    await _pickVoice();
   }
+
+  /// Yang diketik user menang; kalau kosong, pakai yang ditanam saat build.
+  static String? _pilih(String? diketik, String tertanam) {
+    final t = (diketik ?? '').trim();
+    if (t.isNotEmpty) return t;
+    return tertanam.trim().isEmpty ? null : tertanam.trim();
+  }
+
+  /// `true` kalau suara AI bisa jalan tanpa user mengetik apa pun.
+  bool get ttsBakedIn => BuildConfig.hasBakedTts;
 
   /// Suara tersimpan dipakai kalau masih ada di daftar. Kalau tidak — misalnya
   /// kredensial baru dipasang dan daftarnya berganti total — pilih yang
   /// pertama, karena daftarnya sudah diurutkan dari yang terbaik.
-  void _pickVoice() {
+  Future<void> _pickVoice() async {
     final tersedia = player.engine.voices;
     if (tersedia.isEmpty) return;
 
     final tersimpan = _settings.voiceId;
-    final masihAda = tersimpan != null &&
-        tersedia.any((v) => v.id == tersimpan);
-    if (masihAda) {
+    if (tersimpan != null && tersedia.any((v) => v.id == tersimpan)) {
       player.setVoice(tersimpan);
       return;
     }
 
     final indo = tersedia.where((v) => v.isIndonesian);
-    player.setVoice((indo.isNotEmpty ? indo.first : tersedia.first).id);
+    final dipilih = (indo.isNotEmpty ? indo.first : tersedia.first).id;
+    player.setVoice(dipilih);
+
+    // Ikut disimpan. Tanpa ini `settings.voiceId` masih menunjuk suara lama
+    // yang sudah tidak ada di daftar — dan pemilih suara di Pengaturan
+    // menunjuk nilai yang tidak punya pilihan yang cocok.
+    _settings = _settings.copyWith(voiceId: dipilih);
+    await settingsStore.saveSettings(_settings);
   }
 
   Future<void> completeOnboarding({

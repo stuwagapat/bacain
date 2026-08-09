@@ -40,6 +40,13 @@ class CloudSpeechEngine implements SpeechEngine {
   List<VoiceOption> _voices = const [];
   var _budgetWarned = false;
   var _usingFallback = false;
+  String? _lastError;
+
+  /// Kesalahan terakhir dari layanan suara, apa adanya. Menelan pesan ini —
+  /// seperti versi sebelumnya — membuat kegagalan mustahil didiagnosis: user
+  /// tidak bisa membedakan kunci salah, billing belum aktif, dan API belum
+  /// diaktifkan. Ketiganya terlihat sama: "tidak terjadi apa-apa".
+  String? get lastError => _lastError;
 
   @override
   List<VoiceOption> get voices => _voices;
@@ -58,6 +65,7 @@ class CloudSpeechEngine implements SpeechEngine {
   @override
   Future<void> init() async {
     await fallback?.init();
+    _lastError = null;
     if (!client.configured) {
       _voices = fallback?.voices ?? const [];
       _usingFallback = true;
@@ -74,10 +82,20 @@ class CloudSpeechEngine implements SpeechEngine {
           .map((v) => VoiceOption(id: v.id, name: v.label, lang: v.lang))
           .toList());
       _usingFallback = false;
-    } catch (_) {
-      // Daftar suara gagal diambil — kredensial salah, atau sedang offline.
-      // Jangan menggagalkan app; pakai mesin sistem dan biarkan Pengaturan
-      // yang menjelaskan.
+      if (_voices.isEmpty) {
+        _lastError = 'Tersambung, tapi tidak ada suara Bahasa Indonesia '
+            'yang dikembalikan layanan.';
+        _voices = fallback?.voices ?? const [];
+        _usingFallback = true;
+      }
+    } on TtsException catch (e) {
+      // Pesan Google disimpan, bukan dibuang: itu satu-satunya petunjuk yang
+      // memberi tahu user apa yang sebenarnya perlu diperbaiki.
+      _lastError = e.message;
+      _voices = fallback?.voices ?? const [];
+      _usingFallback = true;
+    } catch (e) {
+      _lastError = '$e';
       _voices = fallback?.voices ?? const [];
       _usingFallback = true;
     }
@@ -124,10 +142,13 @@ class CloudSpeechEngine implements SpeechEngine {
       // jadi tidak boleh ikut memakan pagu kita.
       budget.spend(text.length);
       await cache.put(key, bytes);
+      _lastError = null;
       return bytes;
-    } on TtsException {
+    } on TtsException catch (e) {
+      _lastError = e.message;
       return null;
-    } catch (_) {
+    } catch (e) {
+      _lastError = '$e';
       return null;
     }
   }

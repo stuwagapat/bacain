@@ -76,19 +76,35 @@ atau **$5**) → aktifkan pemberitahuan di 50%, 90%, 100%.
 Ini satu-satunya penjaga yang tidak bisa dilewati bug di app. Pagu di dalam
 app dan di server adalah usaha-terbaik; yang ini datang dari Google sendiri.
 
-## 7. Tempel ke app
+## 7. Tanam kuncinya ke build — tidak perlu diketik di HP
 
-Buka Bacain → **Pengaturan** → **Suara AI** → tempel kuncinya di kolom
-**"Kunci Google (hanya untuk mencoba)"** → **Simpan & sambungkan**.
+Repo → **Settings → Secrets and variables → Actions → New repository secret**
 
-Kalau berhasil, muncul: *"Tersambung. N suara Indonesia siap dicoba."*
-Naik ke **Suara pembaca** — daftarnya kini berisi suara Google.
+| Nama | Isi |
+|---|---|
+| `BACAIN_TTS_KEY` | kunci dari langkah 4 |
+
+Itu saja. Setiap APK yang dibangun sesudah ini sudah membawa kuncinya —
+buka app, **Pengaturan → Suara AI** langsung berbunyi *"Google Cloud TTS
+aktif"*, dan daftar **Suara pembaca** sudah berisi suara Google.
+
+Untuk memicu build baru: **Actions → "Bangun APK Android" → Run workflow.**
+
+Nanti setelah `server/` terbit, ganti secret-nya jadi `BACAIN_TTS_URL` berisi
+alamat server, lalu **hapus** `BACAIN_TTS_KEY`. App otomatis memakai server —
+tidak ada kode yang perlu diubah, dan APK-nya jadi aman dibagikan.
+
+### Kalau ingin mencoba kunci lain tanpa membangun ulang
+
+Kolom isian di **Pengaturan → Suara AI** tetap ada. Yang diketik di situ
+menang atas yang ditanam; mengosongkannya kembali ke yang ditanam.
 
 ---
 
 ## Kalau gagal tersambung
 
-Pesan dari Google diteruskan apa adanya ke layar, jadi baca kalimatnya:
+Buka **Pengaturan → Suara AI** lalu tekan **Sambungkan**. Pesan dari Google
+ditampilkan apa adanya di kotak oranye — bisa disalin. Baca kalimatnya:
 
 | Pesan | Artinya |
 |---|---|
@@ -96,13 +112,15 @@ Pesan dari Google diteruskan apa adanya ke layar, jadi baca kalimatnya:
 | `Cloud Text-to-Speech API has not been used in project…` | langkah 3 terlewat |
 | `This API method requires billing to be enabled` | langkah 2 terlewat |
 | `Requests to this API … are blocked` | pembatasan di langkah 5 terlalu ketat — pastikan Application restrictions = None |
+| `Tidak bisa menghubungi layanan suara` | tidak ada koneksi, atau APK-nya versi lama yang belum punya izin internet |
 | `Quota exceeded` | kuota gratis bulan ini habis |
 
 ---
 
 ## Sesudah selesai menilai
 
-**Hapus kuncinya dari Pengaturan sebelum APK dibagikan ke siapa pun.** Kunci
+**Hapus secret `BACAIN_TTS_KEY` sebelum APK dibagikan ke siapa pun**, lalu
+bangun ulang. Kunci
 yang ada di dalam app ikut terbawa dalam APK dan bisa diambil siapa saja yang
 memegang berkasnya — lalu dipakai atas tagihanmu.
 
