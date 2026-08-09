@@ -182,10 +182,30 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
               child: _kotak(_berhasil ? greenDeep : orange, _pesan!),
             ),
 
-          const SizedBox(height: 12),
+          if (_aktif) ...[
+            const SizedBox(height: 4),
+            SwitchListTile(
+              key: const Key('tts-all-voices'),
+              contentPadding: EdgeInsets.zero,
+              value: widget.state.showAllVoices,
+              activeThumbColor: green,
+              title: const Text('Bandingkan semua suara'),
+              subtitle: Text(
+                  'Menampilkan seluruh suara Google beserta nama modelnya di '
+                  'pemilih di atas. Untuk menilai kualitas — bukan untuk '
+                  'dipakai sehari-hari. Kembali ke dua pilihan saat app '
+                  'ditutup.',
+                  style: bodyStyle.copyWith(fontSize: 12.5)),
+              onChanged: widget.state.toggleAllVoices,
+            ),
+          ],
+
+          const SizedBox(height: 8),
           Text(
-            'Chirp3 HD terdengar paling manusiawi, lalu Neural2, lalu WaveNet. '
-            'Memilih suara di daftar atas langsung memperdengarkan contohnya.',
+            'Suara ditawarkan sebagai dua nama — Ayu dan Bima — dan selalu '
+            'dipetakan ke model terbaik yang tersedia hari itu. Nama modelnya '
+            'tidak ditampilkan karena tidak memberi tahu apa pun kepada orang '
+            'yang cuma ingin mendengarkan.',
             style: bodyStyle.copyWith(fontSize: 12.5, height: 1.5),
           ),
         ],

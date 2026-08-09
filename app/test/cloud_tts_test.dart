@@ -119,12 +119,23 @@ void main() {
       );
     });
 
-    test('hanya menawarkan suara Indonesia, yang terbaik di atas', () async {
+    test('menawarkan dua nama manusia, bukan nama model', () async {
       await engine.init();
-      expect(engine.voices.length, 3, reason: 'suara en-US tidak relevan');
+      expect(engine.voices.length, 2,
+          reason: 'pembaca buku tidak sedang memilih perangkat lunak');
+      expect(engine.voices.map((v) => v.name).toList(),
+          ['Ayu · perempuan', 'Bima · laki-laki']);
+      // Nama modelnya tetap dipakai di balik layar sebagai kunci penyimpanan
+      // dan kunci cache — yang berganti cuma yang dilihat user.
       expect(engine.voices.first.id, 'id-ID-Chirp3-HD-Aoede',
-          reason: 'yang paling manusiawi didahulukan karena itu yang dinilai');
-      expect(engine.voices.last.id, 'id-ID-Standard-B');
+          reason: 'nama dipetakan ke model terbaik yang tersedia');
+    });
+
+    test('daftar lengkap tetap ada untuk membandingkan saat menilai', () async {
+      await engine.init();
+      expect(engine.allVoices.length, 3, reason: 'suara en-US tidak relevan');
+      expect(engine.allVoices.first.name, contains('Chirp3 HD'));
+      expect(engine.allVoices.last.id, 'id-ID-Standard-B');
     });
 
     test('kalimat yang sama tidak pernah dibayar dua kali', () async {

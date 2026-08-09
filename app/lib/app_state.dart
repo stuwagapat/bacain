@@ -27,6 +27,7 @@ import 'core/text/sentences.dart';
 import 'core/tts/cloud_speech_engine.dart';
 import 'core/tts/google_tts_client.dart';
 import 'core/tts/segment_player.dart';
+import 'core/tts/speech_engine.dart';
 
 class AppState extends ChangeNotifier {
   final LibraryStore store;
@@ -84,6 +85,23 @@ class AppState extends ChangeNotifier {
   /// Menyala saat jatah baru saja habis di tengah mendengar, supaya UI bisa
   /// memunculkan layar "jatah habis" sekali — bukan berulang-ulang.
   bool quotaJustRanOut = false;
+
+  /// Alat bantu saat MENILAI kualitas suara, bukan pengaturan produk. Sengaja
+  /// tidak disimpan: begitu app ditutup, kembali ke dua pilihan bernama.
+  bool showAllVoices = false;
+
+  /// Suara yang ditawarkan di pemilih. Biasanya cuma dua — Ayu dan Bima —
+  /// karena pembaca buku tidak sedang memilih perangkat lunak.
+  List<VoiceOption> get voiceChoices {
+    final engine = player.engine;
+    if (showAllVoices && engine is CloudSpeechEngine) return engine.allVoices;
+    return engine.voices;
+  }
+
+  void toggleAllVoices(bool v) {
+    showAllVoices = v;
+    notifyListeners();
+  }
 
   List<StoredBook> get books => List.unmodifiable(_books);
   StoredBook? get active => _active;

@@ -69,36 +69,57 @@ class SettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               _group('SUARA'),
-              if (state.player.engine.voices.isNotEmpty)
-                ListTile(
-                  key: const Key('set-voice'),
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Suara pembaca'),
-                  trailing: SizedBox(
-                    width: 200,
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: s.voiceId ?? state.player.voiceId,
-                      underline: const SizedBox.shrink(),
-                      items: state.player.engine.voices
-                          .take(12)
-                          .map((v) => DropdownMenuItem(
-                                value: v.id,
-                                child: Text(v.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14)),
-                              ))
-                          .toList(),
-                      onChanged: (id) async {
-                        if (id == null) return;
-                        await state.updateSettings(s.copyWith(voiceId: id));
-                        // Langsung diperdengarkan: membandingkan suara tanpa
-                        // mendengarnya sama saja memilih dengan mata.
-                        await state.previewVoice(id);
-                      },
-                    ),
-                  ),
-                ),
+              if (state.voiceChoices.isNotEmpty)
+                Builder(builder: (context) {
+                  final pilihan = state.voiceChoices;
+                  final terpilih = pilihan.any((v) => v.id == s.voiceId)
+                      ? s.voiceId
+                      : pilihan.first.id;
+                  final aktif = pilihan.firstWhere((v) => v.id == terpilih);
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        key: const Key('set-voice'),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Suara pembaca'),
+                        // Keterangan singkat di bawah namanya, bukan nama
+                        // model. "id-ID-Chirp3-HD-Aoede" tidak memberi tahu
+                        // apa pun kepada orang yang cuma ingin mendengarkan.
+                        subtitle: aktif.note.isEmpty
+                            ? null
+                            : Text(aktif.note,
+                                style: bodyStyle.copyWith(fontSize: 12.5)),
+                        trailing: SizedBox(
+                          width: 190,
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: terpilih,
+                            underline: const SizedBox.shrink(),
+                            items: pilihan
+                                .map((v) => DropdownMenuItem(
+                                      value: v.id,
+                                      child: Text(v.name,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 14)),
+                                    ))
+                                .toList(),
+                            onChanged: (id) async {
+                              if (id == null) return;
+                              await state
+                                  .updateSettings(s.copyWith(voiceId: id));
+                              // Langsung diperdengarkan: membandingkan suara
+                              // tanpa mendengarnya sama saja memilih dengan
+                              // mata.
+                              await state.previewVoice(id);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               if (state.player.engine.voices.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),

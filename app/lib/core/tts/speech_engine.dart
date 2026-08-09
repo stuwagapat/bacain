@@ -18,7 +18,16 @@ class VoiceOption {
   final String name;
   final String lang;
 
-  const VoiceOption({required this.id, required this.name, required this.lang});
+  /// Satu baris keterangan di bawah namanya. Kosong untuk suara bawaan
+  /// perangkat — di sana tidak ada yang bisa diterangkan dengan jujur.
+  final String note;
+
+  const VoiceOption({
+    required this.id,
+    required this.name,
+    required this.lang,
+    this.note = '',
+  });
 
   bool get isIndonesian => lang.toLowerCase().startsWith('id');
 

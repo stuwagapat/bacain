@@ -54,7 +54,7 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Kamera + OCR buku fisik | jalan, sudah dicoba di HP |
 | Suara AI (Google Cloud TTS) | jalur selesai, **menunggu kredensial** |
 
-**142 uji lolos** (`cd app && flutter test`).
+**153 uji lolos** (`cd app && flutter test`).
 
 > ⚠️ Baris "belum dicoba di HP" **tidak boleh dianggap beres**. Semuanya
 > khusus Android dan nol kemungkinan diverifikasi dari sandbox ini — yang
@@ -93,7 +93,7 @@ Dilayani GitHub Pages dari branch `claude/app-pembaca-buku-ai-du5dtq`, folder
 ```bash
 export PATH=/opt/flutter/bin:$PATH
 cd app
-flutter test                 # 142 uji
+flutter test                 # 153 uji
 flutter run -d chrome        # jalankan
 ```
 
@@ -161,6 +161,7 @@ app/                       proyek Flutter
     tts/cloud_speech_engine.dart  mesin bicara ketiga: Google Cloud TTS
     tts/google_tts_client.dart    HTTP ke Google atau ke server sendiri
     tts/tts_budget.dart       pagu karakter harian — penjaga tagihan
+    tts/voice_persona.dart    beri nama manusia pada suara Google
     build_config.dart         nilai yang ditanam saat build (--dart-define)
     tts/speech_engine.dart antarmuka mesin bicara + mesin tiruan untuk uji
     tts/segment_player.dart urutan, jeda, lompat, kalimat aktif
@@ -175,7 +176,7 @@ app/                       proyek Flutter
     file_audio_cache.dart     cache audio di penyimpanan perangkat
   lib/screens/             layar          ← lapisan desain
   lib/ui/tokens.dart       warna & widget bersama  ← lapisan desain
-  test/                    142 uji
+  test/                    153 uji
   android/                 konfigurasi Android (manifest, gradle, penandatanganan)
   assets/contoh.epub       buku contoh, teks tulisan sendiri (bukan berhak cipta)
 .github/workflows/apk.yml  pipa pembangun APK
@@ -260,6 +261,19 @@ Indonesia sungguhan: Chirp3 HD di atas, lalu Neural2, lalu WaveNet.
 
 Kolom isian di Pengaturan tetap ada untuk mencoba kunci lain tanpa membangun
 ulang. Yang diketik menang atas yang ditanam; dikosongkan kembali ke bawaan.
+
+**Suara ditawarkan sebagai dua nama: Ayu (perempuan) dan Bima (laki-laki)** —
+sesuai wireframe di `rencana-mvp.md`. Nama model Google tidak pernah tampil;
+tiap nama dipetakan ke model TERBAIK yang tersedia hari itu, jadi tetap benar
+walau Google menambah atau mencabut suara. Untuk membandingkan semua suara
+saat menilai kualitas, ada saklar "Bandingkan semua suara" di bagian Suara AI;
+sengaja tidak disimpan, jadi kembali ke dua pilihan begitu app ditutup.
+
+> Keterangan di bawah tiap nama baru menyebut **tingkat modelnya** ("model
+> terbaru, paling halus"). Karakter suaranya — hangat, tenang, tegas — sengaja
+> dikosongkan: itu cuma bisa dinilai dengan mendengarkan, dan menuliskannya
+> tanpa mendengar sama saja mengarang. Isi setelah mendengar, di
+> `core/tts/voice_persona.dart` → `VoiceCatalog.noteFor`.
 
 > ⚠️ Ditanam saat build **tetap ikut ke dalam APK.** Tidak ada di kode sumber
 > bukan berarti tidak bisa diambil. Hapus secret `BACAIN_TTS_KEY` dan bangun

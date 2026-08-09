@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'cloud_tts.dart';
 import 'speech_engine.dart';
 import 'tts_budget.dart';
+import 'voice_persona.dart';
 
 class CloudSpeechEngine implements SpeechEngine {
   CloudSpeechEngine({
@@ -37,7 +38,11 @@ class CloudSpeechEngine implements SpeechEngine {
   /// tahu alih-alih diam-diam berganti suara.
   final void Function()? onBudgetExhausted;
 
+  /// Katalog pemberi nama manusia. Bisa ditukar saat uji.
+  final VoiceCatalog catalog = const VoiceCatalog();
+
   List<VoiceOption> _voices = const [];
+  List<VoiceOption> _allVoices = const [];
   var _budgetWarned = false;
   var _usingFallback = false;
   String? _lastError;
@@ -50,6 +55,10 @@ class CloudSpeechEngine implements SpeechEngine {
 
   @override
   List<VoiceOption> get voices => _voices;
+
+  /// Seluruh suara Indonesia dengan nama model aslinya — untuk MEMBANDINGKAN
+  /// saat masih menilai kualitas, bukan untuk dipilih pembaca buku sehari-hari.
+  List<VoiceOption> get allVoices => _allVoices;
 
   /// Audio sungguhan bisa ditahan di tengah kalimat. Tapi saat sedang jatuh
   /// ke mesin cadangan, yang berlaku kemampuan MESIN ITU — browser bisa,
@@ -78,8 +87,25 @@ class CloudSpeechEngine implements SpeechEngine {
           final byKind = CloudVoice.rank(a).compareTo(CloudVoice.rank(b));
           return byKind != 0 ? byKind : a.id.compareTo(b.id);
         });
-      _voices = List.unmodifiable(indo
-          .map((v) => VoiceOption(id: v.id, name: v.label, lang: v.lang))
+
+      _allVoices = List.unmodifiable(indo
+          .map((v) => VoiceOption(
+                id: v.id,
+                name: v.label,
+                lang: v.lang,
+                note: VoiceCatalog.noteFor(v),
+              ))
+          .toList());
+
+      // Yang ditawarkan ke user hanya persona bernama manusia.
+      _voices = List.unmodifiable(catalog
+          .personas(indo)
+          .map((p) => VoiceOption(
+                id: p.voiceId,
+                name: p.label,
+                lang: 'id-ID',
+                note: p.note,
+              ))
           .toList());
       _usingFallback = false;
       if (_voices.isEmpty) {
