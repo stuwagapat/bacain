@@ -46,26 +46,33 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Jatah harian | jalan, teruji |
 | Mode fokus | jalan |
 | Pengaturan | jalan |
+| Impor PDF berlapis teks | jalan, teruji |
+| Build APK lewat GitHub Actions | jalan |
 | Mesin bicara Android (flutter_tts) | kode selesai, **belum dicoba di HP** |
-| Build APK lewat GitHub Actions | jalan — APK terbangun (±24 MB) |
+| Pengingat harian | kode selesai, **belum dicoba di HP** |
+| Pemutaran saat layar mati | kode selesai, **belum dicoba di HP** |
+| Kamera + OCR buku fisik | kode selesai, **belum dicoba di HP** |
 
-**73 uji lolos** (`cd app && flutter test`).
+**113 uji lolos** (`cd app && flutter test`).
+
+> ⚠️ Empat baris "belum dicoba di HP" itu **tidak boleh dianggap beres**.
+> Semuanya khusus Android dan nol kemungkinan diverifikasi dari sandbox ini —
+> yang terbukti hanya bahwa kodenya terkompilasi dan logikanya benar. Daftar
+> yang perlu dicoba ada di bagian 8.
 
 ### Belum ada
 
 | Belum ada | Kenapa |
 |---|---|
-| Kamera + OCR buku fisik | belum ditulis (ML Kit, on-device) |
-| Notifikasi harian sungguhan | belum ditulis |
-| Pemutaran saat layar mati | butuh foreground service; belum ditulis |
 | Suara AI berkualitas | butuh kredensial Google Cloud TTS |
 | Ringkasan "sebelumnya" yang benar-benar merangkum | butuh Claude API |
-| Impor PDF | jalur EPUB didahulukan |
+| Kontrol di layar kunci | butuh MediaSession; layanan latar depan sudah ada |
+| OCR untuk PDF hasil pindaian | ditolak dengan pesan yang mengarahkan ke kamera |
 
 Layar recap **jujur** menampilkan kalimat penutup bagian sebelumnya dan
 menyatakan bahwa ringkasan sungguhan menyusul — tidak mengarang ringkasan.
-"Foto buku fisik" tetap tampil di sheet sumber tapi dimatikan dengan alasannya
-tertulis, supaya alur produknya utuh terlihat.
+"Foto buku fisik" tetap tampil di sheet sumber saat dibuka di web, tapi
+dimatikan dengan alasannya tertulis — supaya alur produknya utuh terlihat.
 
 ---
 
@@ -81,7 +88,7 @@ Dilayani GitHub Pages dari branch `claude/app-pembaca-buku-ai-du5dtq`, folder
 ```bash
 export PATH=/opt/flutter/bin:$PATH
 cd app
-flutter test                 # 69 uji
+flutter test                 # 113 uji
 flutter run -d chrome        # jalankan
 ```
 
@@ -140,19 +147,28 @@ app/                       proyek Flutter
     text/sentences.dart    pecah kalimat + offset (untuk highlight)
     text/segmenter.dart    pecah buku jadi jatah harian  ← inti mekanik
     epub/epub_reader.dart  baca EPUB dari byte
+    pdf/pdf_reader.dart    baca PDF berlapis teks
+    text/chapter_finder.dart  tebak batas bab (dipakai PDF & hasil foto)
+    scan/                  susun buku dari hasil foto + antarmuka pemindai
+    reminders/             perencanaan pengingat harian (murni)
+    playback/keep_awake.dart  antarmuka layanan latar depan
     tts/speech_engine.dart antarmuka mesin bicara + mesin tiruan untuk uji
     tts/segment_player.dart urutan, jeda, lompat, kalimat aktif
     store/                 rak buku, pengaturan, jatah harian
   lib/platform/            mesin bicara per platform
     web_speech_engine.dart    browser: speechSynthesis
     native_speech_engine.dart Android: flutter_tts
+    page_scanner.dart         kamera Google + OCR ML Kit
+    reminders.dart            notifikasi terjadwal
+    keep_awake.dart           layanan latar depan
   lib/screens/             layar          ← lapisan desain
   lib/ui/tokens.dart       warna & widget bersama  ← lapisan desain
-  test/                    73 uji
+  test/                    113 uji
   android/                 konfigurasi Android (manifest, gradle, penandatanganan)
   assets/contoh.epub       buku contoh, teks tulisan sendiri (bukan berhak cipta)
 .github/workflows/apk.yml  pipa pembangun APK
 docs/                      HASIL BUILD untuk GitHub Pages — jangan diedit tangan
+tools/                     pemeriksa pemutar di Chromium sungguhan
 design/                    token desain, wireframe, skrip Figma
 notes/                     dokumen tulisan tangan (rencana, status ini)
 prototype/                 prototipe HTML halaman 1 (sebelum Flutter)
@@ -189,6 +205,20 @@ ke Android tanpa ditulis ulang.
 
 **EPUB didahulukan** karena daftar isinya eksplisit: kalau segmentasi salah,
 ketahuan penyebabnya memang segmentasi, bukan OCR yang meleset.
+
+**Perencanaan dipisah dari pengiriman.** Pengingat harian, penyusunan buku
+dari hasil foto, dan pencarian bab semuanya murni perhitungan di `core/` —
+lapisan platform hanya menembakkan hasilnya. Itu satu-satunya alasan fitur
+khusus Android masih punya 113 uji: yang diuji keputusannya, bukan kabelnya.
+
+**Pencari bab dipakai bersama PDF dan hasil foto.** Keduanya sampai di titik
+yang sama: setumpuk halaman teks tanpa daftar isi. EPUB tidak memerlukannya
+karena daftar isinya eksplisit.
+
+**Hasil OCR selalu lewat layar tinjau.** OCR tidak akan pernah 100% benar.
+Foto aslinya ditampilkan di atas teks hasil bacaan supaya user bisa
+membandingkan — bukan disuruh percaya lalu baru sadar salah setelah
+mendengarnya dibacakan.
 
 **Mesin bicara melaporkan kemampuannya, bukan platformnya.** Pemutar tidak
 pernah bertanya "ini Android atau web"; ia bertanya `canPauseMidSentence`.
@@ -253,7 +283,10 @@ murni Dart.
 9. **Sejak Android 11, daftar suara pulang kosong** tanpa pesan error apa pun
    kalau `<queries>` untuk `TTS_SERVICE` tidak ada di manifest. App akan
    terlihat bisu padahal mesin TTS-nya terpasang normal.
-10. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
+10. **`flutter_local_notifications` menuntut core library desugaring.** Tanpa
+    itu build berhenti di `checkReleaseAarMetadata`. Pesannya jelas menyebut
+    nama paketnya, tapi hanya muncul setelah ±4 menit kompilasi.
+11. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
     Di AGP 9 dua paket punya asumsi yang saling bertentangan dan tidak ada
     nilai `android.builtInKotlin` yang memuaskan keduanya:
     `false` membuat `file_picker` tidak mengompilasi Kotlin-nya sama sekali
@@ -308,11 +341,28 @@ Semuanya ketahuan dari **menjalankan**, bukan membaca kode:
 **Yang perlu dicoba di HP sungguhan** — semua ini tidak bisa diverifikasi dari
 sandbox, jadi jangan dianggap beres sampai ada yang mencobanya:
 
+*Suara*
 - Suara id-ID muncul di daftar dan terpilih otomatis.
 - Kecepatan 1.0× terdengar normal, bukan dua kali lipat.
 - Tombol jeda berhenti seketika, dan saat dilanjutkan kalimatnya diulang dari
   awal — bukan melompat ke kalimat berikutnya.
-- Impor EPUB lewat file picker Android.
+
+*Berkas*
+- Impor EPUB dan PDF lewat file picker Android.
+- PDF hasil pindaian ditolak dengan pesan yang mengarahkan ke kamera.
+
+*Kamera*
+- Pemindai Google terbuka, deteksi sudutnya bekerja, mode banyak halaman.
+- Teks hasil OCR muncul di layar tinjau berdampingan dengan fotonya.
+- Perbaikan teks di layar tinjau ikut terbawa ke buku yang tersimpan.
+
+*Latar belakang*
+- Bacaan lanjut saat layar dimatikan dan saat app ditinggal.
+- Notifikasi "sedang membacakan" hilang begitu dijeda.
+
+*Pengingat*
+- Izin notifikasi diminta saat tombolnya dinyalakan.
+- Notifikasi datang di jam yang dipilih, dan kalimatnya berganti antar hari.
 
 **Pekerjaan teknis yang jelas berikutnya:**
 
