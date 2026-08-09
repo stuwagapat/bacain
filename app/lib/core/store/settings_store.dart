@@ -27,6 +27,15 @@ class AppSettings {
   /// Teks bacaan diperbesar — opsi keterbacaan, bukan pemanis.
   final bool largeText;
 
+  /// Alamat server sintesis sendiri. Jalur produksi: kuncinya ada di server
+  /// dan tidak pernah masuk APK.
+  final String? ttsProxyUrl;
+
+  /// Kunci Google yang diketik user, HANYA untuk menilai suaranya. Disimpan
+  /// di perangkatnya sendiri, tidak pernah ikut dikompilasi. Kalau server
+  /// sudah ada, server yang dipakai dan kunci ini diabaikan.
+  final String? ttsApiKey;
+
   const AppSettings({
     this.onboarded = false,
     this.reminderHour = 7,
@@ -36,7 +45,12 @@ class AppSettings {
     this.rate = 1.0,
     this.voiceId,
     this.largeText = false,
+    this.ttsProxyUrl,
+    this.ttsApiKey,
   });
+
+  bool get cloudTtsConfigured =>
+      (ttsProxyUrl ?? '').trim().isNotEmpty || (ttsApiKey ?? '').trim().isNotEmpty;
 
   Duration get dailyBudget => Duration(minutes: dailyMinutes);
 
@@ -52,6 +66,8 @@ class AppSettings {
     double? rate,
     String? voiceId,
     bool? largeText,
+    String? ttsProxyUrl,
+    String? ttsApiKey,
   }) =>
       AppSettings(
         onboarded: onboarded ?? this.onboarded,
@@ -62,6 +78,8 @@ class AppSettings {
         rate: rate ?? this.rate,
         voiceId: voiceId ?? this.voiceId,
         largeText: largeText ?? this.largeText,
+        ttsProxyUrl: ttsProxyUrl ?? this.ttsProxyUrl,
+        ttsApiKey: ttsApiKey ?? this.ttsApiKey,
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +91,8 @@ class AppSettings {
         'rate': rate,
         'voiceId': voiceId,
         'largeText': largeText,
+        'ttsProxyUrl': ttsProxyUrl,
+        'ttsApiKey': ttsApiKey,
       };
 
   static AppSettings fromJson(Map<String, dynamic> j) => AppSettings(
@@ -84,6 +104,8 @@ class AppSettings {
         rate: (j['rate'] as num?)?.toDouble() ?? 1.0,
         voiceId: j['voiceId'] as String?,
         largeText: j['largeText'] as bool? ?? false,
+        ttsProxyUrl: j['ttsProxyUrl'] as String?,
+        ttsApiKey: j['ttsApiKey'] as String?,
       );
 }
 

@@ -1,0 +1,10 @@
+{
+  "name": "bacain-tts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Perantara ke Google Cloud TTS supaya kunci tidak masuk APK",
+  "main": "index.js",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node index.js" },
+  "dependencies": { "express": "^4.21.2" }
+}

@@ -23,6 +23,8 @@ import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
 import 'core/text/segmenter.dart';
 import 'core/text/sentences.dart';
+import 'core/tts/cloud_speech_engine.dart';
+import 'core/tts/google_tts_client.dart';
 import 'core/tts/segment_player.dart';
 
 class AppState extends ChangeNotifier {
@@ -121,16 +123,8 @@ class AppState extends ChangeNotifier {
     quota = QuotaTracker(usage: await settingsStore.loadUsage(), clock: clock);
     _books = await store.load();
 
-    await player.engine.init();
+    await _applyTtsConfig();
     player.setRate(_settings.rate);
-    final voice = _settings.voiceId ??
-        player.engine.voices
-            .where((v) => v.isIndonesian)
-            .map((v) => v.id)
-            .firstOrNull ??
-        player.engine.voices.map((v) => v.id).firstOrNull;
-    if (voice != null) player.setVoice(voice);
-
     _busy = false;
     notifyListeners();
     await syncReminders();
@@ -175,12 +169,54 @@ class AppState extends ChangeNotifier {
   // ── pengaturan ───────────────────────────────────────────────────
 
   Future<void> updateSettings(AppSettings next) async {
+    final kredensialBerubah = next.ttsProxyUrl != _settings.ttsProxyUrl ||
+        next.ttsApiKey != _settings.ttsApiKey;
     _settings = next;
     player.setRate(next.rate);
     if (next.voiceId != null) player.setVoice(next.voiceId);
     await settingsStore.saveSettings(next);
+
+    // Kredensial baru harus langsung terasa: daftar suara diambil ulang dan
+    // suaranya berganti tanpa app dimulai ulang.
+    if (kredensialBerubah) await _applyTtsConfig();
+
     notifyListeners();
     await syncReminders();
+  }
+
+  /// Menyalakan mesin bicara dengan kredensial yang tersimpan, lalu memilih
+  /// suara. Dipanggil saat app dibuka dan tiap kali kredensialnya berubah.
+  Future<void> _applyTtsConfig() async {
+    final engine = player.engine;
+    if (engine is CloudSpeechEngine) {
+      final client = engine.client;
+      if (client is GoogleTtsClient) {
+        client.proxyUrl = _settings.ttsProxyUrl;
+        client.apiKey = _settings.ttsApiKey;
+      }
+    }
+
+    await player.engine.init();
+    _pickVoice();
+  }
+
+  /// Suara tersimpan dipakai kalau masih ada di daftar. Kalau tidak — misalnya
+  /// kredensial baru dipasang dan daftarnya berganti total — pilih yang
+  /// pertama, karena daftarnya sudah diurutkan dari yang terbaik.
+  void _pickVoice() {
+    final tersedia = player.engine.voices;
+    if (tersedia.isEmpty) return;
+
+    final tersimpan = _settings.voiceId;
+    final masihAda = tersimpan != null &&
+        tersedia.any((v) => v.id == tersimpan);
+    if (masihAda) {
+      player.setVoice(tersimpan);
+      return;
+    }
+
+    final indo = tersedia.where((v) => v.isIndonesian);
+    player.setVoice((indo.isNotEmpty ? indo.first : tersedia.first).id);
   }
 
   Future<void> completeOnboarding({
@@ -194,6 +230,25 @@ class AppState extends ChangeNotifier {
         reminderMinute: minute,
         reminderOn: reminderOn,
       ));
+
+  /// Kalimat contoh untuk mencicipi suara. Sengaja dipilih yang menuntut
+  /// intonasi: ada koma, tanda tanya, nama diri, dan angka — empat hal yang
+  /// paling sering membuat mesin bicara terdengar kaku.
+  static const voiceSample =
+      'Pada bab keempat, Epictetus bertanya: apa yang sungguh-sungguh ada '
+      'dalam kendali kita? Ternyata tidak banyak — hanya tiga hal.';
+
+  /// Membacakan kalimat contoh dengan suara tertentu, tanpa mengganggu
+  /// bagian yang sedang dibuka di pemutar.
+  Future<void> previewVoice(String voiceId) async {
+    await player.engine.stop();
+    try {
+      await player.engine
+          .speakOne(voiceSample, voiceId: voiceId, rate: _settings.rate);
+    } catch (_) {
+      // Gagal mencicip bukan alasan menjatuhkan layar Pengaturan.
+    }
+  }
 
   /// Hanya untuk uji coba: kembalikan jatah hari ini supaya alurnya bisa
   /// dicoba berulang tanpa menunggu besok.
@@ -406,8 +461,4 @@ class AppState extends ChangeNotifier {
     player.onSentenceCompleted = null;
     super.dispose();
   }
-}
-
-extension _FirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }

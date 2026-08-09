@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- WAJIB untuk suara AI. Flutter hanya menambahkan izin ini di build
+         debug, jadi tanpa baris ini APK rilis diam-diam tidak bisa menghubungi
+         layanan suara sama sekali — dan gejalanya cuma "suaranya tidak
+         berganti", bukan pesan kesalahan. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Pengingat harus dipasang ulang setelah HP dinyalakan ulang; tanpa ini
          jadwalnya hilang diam-diam dan user mengira app-nya berhenti bekerja. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>

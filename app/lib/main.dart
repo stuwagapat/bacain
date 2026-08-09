@@ -4,8 +4,13 @@ import 'package:flutter/semantics.dart';
 import 'app_state.dart';
 import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
+import 'core/tts/cloud_speech_engine.dart';
+import 'core/tts/google_tts_client.dart';
 import 'core/tts/segment_player.dart';
+import 'core/tts/tts_budget.dart';
 import 'platform/keep_awake.dart';
+import 'platform/audio_sink.dart';
+import 'platform/file_audio_cache.dart';
 import 'platform/page_scanner.dart';
 import 'platform/reminders.dart';
 import 'platform/speech_engine_factory.dart';
@@ -23,7 +28,18 @@ void main() {
   final state = AppState(
     store: PrefsLibraryStore(),
     settingsStore: PrefsSettingsStore(),
-    player: SegmentPlayer(engine: createSpeechEngine()),
+    // Mesin cloud dibungkus di atas mesin sistem. Kredensialnya dipasang
+    // belakangan dari Pengaturan; selama belum ada, mesin sistem yang dipakai
+    // dan app tetap membacakan seperti biasa.
+    player: SegmentPlayer(
+      engine: CloudSpeechEngine(
+        client: GoogleTtsClient(),
+        cache: createAudioCache(),
+        sink: PlayerAudioSink(),
+        budget: TtsBudget(),
+        fallback: createSpeechEngine(),
+      ),
+    ),
     reminders: createReminders(),
     keepAwake: createKeepAwake(),
     scanner: createPageScanner(),

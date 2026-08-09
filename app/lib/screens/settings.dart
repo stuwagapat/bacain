@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../ui/tokens.dart';
+import 'cloud_tts_section.dart';
 
 class SettingsPage extends StatelessWidget {
   final AppState state;
@@ -74,7 +75,7 @@ class SettingsPage extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Suara pembaca'),
                   trailing: SizedBox(
-                    width: 170,
+                    width: 200,
                     child: DropdownButton<String>(
                       isExpanded: true,
                       value: s.voiceId ?? state.player.voiceId,
@@ -88,8 +89,30 @@ class SettingsPage extends StatelessWidget {
                                     style: const TextStyle(fontSize: 14)),
                               ))
                           .toList(),
-                      onChanged: (id) =>
-                          state.updateSettings(s.copyWith(voiceId: id)),
+                      onChanged: (id) async {
+                        if (id == null) return;
+                        await state.updateSettings(s.copyWith(voiceId: id));
+                        // Langsung diperdengarkan: membandingkan suara tanpa
+                        // mendengarnya sama saja memilih dengan mata.
+                        await state.previewVoice(id);
+                      },
+                    ),
+                  ),
+                ),
+              if (state.player.engine.voices.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      key: const Key('set-voice-sample'),
+                      onPressed: () {
+                        final id = s.voiceId ?? state.player.voiceId;
+                        if (id != null) state.previewVoice(id);
+                      },
+                      icon: const Icon(Icons.play_circle_outline, size: 18),
+                      label: const Text('Cicip suara ini'),
+                      style: TextButton.styleFrom(foregroundColor: greenDeep),
                     ),
                   ),
                 ),
@@ -104,6 +127,8 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (v) => state.updateSettings(
                     s.copyWith(rate: double.parse(v.toStringAsFixed(2)))),
               ),
+              const SizedBox(height: 8),
+              CloudTtsSection(state: state),
               const SizedBox(height: 18),
               _group('KETERBACAAN'),
               SwitchListTile(
@@ -131,9 +156,8 @@ class SettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 22),
               Text(
-                'Versi web. Kamera, OCR, notifikasi, dan pemutaran di latar '
-                'belakang menyusul di versi Android. Suaranya masih suara '
-                'sistem — suara AI menyusul lewat Google Cloud TTS.',
+                'Kamera, notifikasi, dan pemutaran di latar belakang hanya '
+                'ada di versi Android.',
                 style: bodyStyle.copyWith(fontSize: 12.5),
               ),
             ],

@@ -51,20 +51,25 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Mesin bicara Android (flutter_tts) | kode selesai, **belum dicoba di HP** |
 | Pengingat harian | kode selesai, **belum dicoba di HP** |
 | Pemutaran saat layar mati | kode selesai, **belum dicoba di HP** |
-| Kamera + OCR buku fisik | kode selesai, **belum dicoba di HP** |
+| Kamera + OCR buku fisik | jalan, sudah dicoba di HP |
+| Suara AI (Google Cloud TTS) | jalur selesai, **menunggu kredensial** |
 
-**113 uji lolos** (`cd app && flutter test`).
+**134 uji lolos** (`cd app && flutter test`).
 
-> ⚠️ Empat baris "belum dicoba di HP" itu **tidak boleh dianggap beres**.
-> Semuanya khusus Android dan nol kemungkinan diverifikasi dari sandbox ini —
-> yang terbukti hanya bahwa kodenya terkompilasi dan logikanya benar. Daftar
-> yang perlu dicoba ada di bagian 8.
+> ⚠️ Baris "belum dicoba di HP" **tidak boleh dianggap beres**. Semuanya
+> khusus Android dan nol kemungkinan diverifikasi dari sandbox ini — yang
+> terbukti hanya bahwa kodenya terkompilasi dan logikanya benar. Daftar yang
+> perlu dicoba ada di bagian 8.
+>
+> Kamera sudah dicoba di HP dan bekerja. Beberapa kalimat terlewat pada foto
+> yang kurang tajam — itu batas OCR, bukan bug, dan memang alasan layar tinjau
+> ada.
 
 ### Belum ada
 
 | Belum ada | Kenapa |
 |---|---|
-| Suara AI berkualitas | butuh kredensial Google Cloud TTS |
+| Kredensial Google Cloud TTS | jalurnya sudah siap, kuncinya belum ada |
 | Ringkasan "sebelumnya" yang benar-benar merangkum | butuh Claude API |
 | Kontrol di layar kunci | butuh MediaSession; layanan latar depan sudah ada |
 | OCR untuk PDF hasil pindaian | ditolak dengan pesan yang mengarahkan ke kamera |
@@ -88,7 +93,7 @@ Dilayani GitHub Pages dari branch `claude/app-pembaca-buku-ai-du5dtq`, folder
 ```bash
 export PATH=/opt/flutter/bin:$PATH
 cd app
-flutter test                 # 113 uji
+flutter test                 # 134 uji
 flutter run -d chrome        # jalankan
 ```
 
@@ -152,6 +157,10 @@ app/                       proyek Flutter
     scan/                  susun buku dari hasil foto + antarmuka pemindai
     reminders/             perencanaan pengingat harian (murni)
     playback/keep_awake.dart  antarmuka layanan latar depan
+    tts/cloud_tts.dart        antarmuka klien, cache, dan pemutar audio
+    tts/cloud_speech_engine.dart  mesin bicara ketiga: Google Cloud TTS
+    tts/google_tts_client.dart    HTTP ke Google atau ke server sendiri
+    tts/tts_budget.dart       pagu karakter harian — penjaga tagihan
     tts/speech_engine.dart antarmuka mesin bicara + mesin tiruan untuk uji
     tts/segment_player.dart urutan, jeda, lompat, kalimat aktif
     store/                 rak buku, pengaturan, jatah harian
@@ -161,13 +170,16 @@ app/                       proyek Flutter
     page_scanner.dart         kamera Google + OCR ML Kit
     reminders.dart            notifikasi terjadwal
     keep_awake.dart           layanan latar depan
+    audio_sink.dart           pemutar MP3 hasil sintesis
+    file_audio_cache.dart     cache audio di penyimpanan perangkat
   lib/screens/             layar          ← lapisan desain
   lib/ui/tokens.dart       warna & widget bersama  ← lapisan desain
-  test/                    113 uji
+  test/                    134 uji
   android/                 konfigurasi Android (manifest, gradle, penandatanganan)
   assets/contoh.epub       buku contoh, teks tulisan sendiri (bukan berhak cipta)
 .github/workflows/apk.yml  pipa pembangun APK
 docs/                      HASIL BUILD untuk GitHub Pages — jangan diedit tangan
+server/                    perantara TTS — kunci tinggal di sini, bukan di APK
 tools/                     pemeriksa pemutar di Chromium sungguhan
 design/                    token desain, wireframe, skrip Figma
 notes/                     dokumen tulisan tangan (rencana, status ini)
@@ -232,6 +244,37 @@ sempat didengar utuh.
 
 ---
 
+## 5a. Menyalakan suara AI
+
+Ada dua jalur, dan bedanya soal keamanan, bukan kualitas.
+
+**Untuk menilai suaranya (sekarang):** Pengaturan → Suara AI → tempel API key
+Google. Kuncinya diketik user, disimpan di perangkatnya, tidak pernah ikut
+dikompilasi. Begitu tersambung, daftar "Suara pembaca" berisi suara Indonesia
+sungguhan — Chirp3 HD di atas, lalu Neural2, lalu WaveNet — dan memilih salah
+satu langsung memperdengarkan contohnya.
+
+> ⚠️ Kunci yang dipasang di app ikut terbawa dalam APK. Siapa pun yang
+> memegang APK bisa mengambilnya dan memakainya atas tagihanmu. Pakai untuk
+> menilai, lalu **hapus kuncinya sebelum APK dibagikan.**
+
+**Untuk dibagikan (nanti):** terbitkan `server/` ke Cloud Run, lalu tempel
+alamatnya ke kolom "Alamat server". Kuncinya tinggal di server. Kata sandi
+server bisa dititipkan langsung di URL-nya: `https://…/tts?s=RAHASIA`.
+Petunjuk lengkapnya di [`../server/README.md`](../server/README.md).
+
+**Penjaga biaya, tiga lapis:**
+
+1. **Cache** — kalimat yang sama tidak pernah dibayar dua kali, bahkan setelah
+   app ditutup. Mendengar ulang benar-benar gratis.
+2. **Pagu harian di app** — 60.000 karakter/hari. Kalau tersentuh, app jatuh
+   ke suara sistem alih-alih berhenti membacakan.
+3. **Pagu global di server** + **Budget Alert di Google Cloud Console.**
+   Pasang yang terakhir itu sebelum layanannya dipakai orang lain — bukan
+   sesudah tagihannya datang.
+
+---
+
 ## 5b. Lisensi yang perlu kamu urus
 
 **`syncfusion_flutter_pdf`** (dipakai untuk impor PDF) bukan lisensi bebas.
@@ -286,11 +329,15 @@ murni Dart.
 10. **`flutter_local_notifications` menuntut core library desugaring.** Tanpa
     itu build berhenti di `checkReleaseAarMetadata`. Pesannya jelas menyebut
     nama paketnya, tapi hanya muncul setelah ±4 menit kompilasi.
-11. **R8 menolak build karena paket OCR merujuk varian aksara yang tidak
+11. **APK rilis tidak punya izin INTERNET secara bawaan.** Flutter hanya
+    menambahkannya di build debug. Tanpa dideklarasikan di manifest utama,
+    suara AI diam-diam tidak bisa menghubungi apa pun di APK rilis — dan
+    gejalanya cuma "suaranya tidak berganti", bukan pesan kesalahan.
+12. **R8 menolak build karena paket OCR merujuk varian aksara yang tidak
     dipasang** (Tionghoa, Devanagari, Jepang, Korea). Didiamkan lewat
     `-dontwarn` di `android/app/proguard-rules.pro`. Kalau nanti butuh aksara
     lain, tambahkan paketnya dan hapus baris yang bersangkutan.
-12. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
+13. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
     Di AGP 9 dua paket punya asumsi yang saling bertentangan dan tidak ada
     nilai `android.builtInKotlin` yang memuaskan keduanya:
     `false` membuat `file_picker` tidak mengompilasi Kotlin-nya sama sekali
@@ -333,10 +380,8 @@ Semuanya ketahuan dari **menjalankan**, bukan membaca kode:
 
 1. **Tes alur** — user sedang mencobanya. Umpan balik menentukan langkah
    berikutnya.
-2. **Kredensial Google Cloud TTS.** Ini satu-satunya penghalang suara AI
-   berkualitas. Suara sekarang = suara sistem, terdengar robotik. Antarmuka
-   `SpeechEngine` sudah disiapkan supaya penggantiannya jadi penambahan satu
-   berkas, bukan bedah ulang.
+2. **Kredensial Google Cloud TTS.** Jalurnya sudah selesai — tinggal
+   ditempel di Pengaturan → Suara AI. Lihat bagian 5a.
 3. **Desain.** User bilang desain menyusul setelah fungsi & alur beres. Aset
    yang sudah ada: `logo.png`, `header 1.png`, `footer 1.png`, `ornament.png`.
    Palet asli dari aset: hijau `#2D6B2D`/`#184818`, oranye `#F06C3C`, aprikot
@@ -355,10 +400,11 @@ sandbox, jadi jangan dianggap beres sampai ada yang mencobanya:
 - Impor EPUB dan PDF lewat file picker Android.
 - PDF hasil pindaian ditolak dengan pesan yang mengarahkan ke kamera.
 
-*Kamera*
-- Pemindai Google terbuka, deteksi sudutnya bekerja, mode banyak halaman.
-- Teks hasil OCR muncul di layar tinjau berdampingan dengan fotonya.
-- Perbaikan teks di layar tinjau ikut terbawa ke buku yang tersimpan.
+*Suara AI* — setelah kredensial dipasang
+- Daftar "Suara pembaca" berisi suara Google, bukan suara sistem.
+- Memilih suara langsung memperdengarkan contohnya.
+- Mendengar ulang bagian yang sama tidak menambah pemakaian karakter.
+- Jeda menahan di tengah kalimat, bukan mengulang dari awal.
 
 *Latar belakang*
 - Bacaan lanjut saat layar dimatikan dan saat app ditinggal.
