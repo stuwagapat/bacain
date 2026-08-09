@@ -6,6 +6,7 @@ import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
 import 'core/tts/segment_player.dart';
 import 'platform/keep_awake.dart';
+import 'platform/page_scanner.dart';
 import 'platform/reminders.dart';
 import 'platform/speech_engine_factory.dart';
 import 'screens/book.dart';
@@ -25,6 +26,7 @@ void main() {
     player: SegmentPlayer(engine: createSpeechEngine()),
     reminders: createReminders(),
     keepAwake: createKeepAwake(),
+    scanner: createPageScanner(),
   );
   runApp(BacainApp(state: state));
 }

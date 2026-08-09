@@ -6,6 +6,7 @@ import '../app_state.dart';
 import '../core/store/library_store.dart';
 import '../ui/tokens.dart';
 import 'confirm_book.dart';
+import 'review_scan.dart';
 import 'settings.dart';
 
 class LibraryPage extends StatelessWidget {
@@ -25,6 +26,43 @@ class LibraryPage extends StatelessWidget {
       ),
     );
     if (stored != null) onOpen(stored);
+  }
+
+  /// Foto buku fisik: pemindai Google, lalu OCR di perangkat, lalu layar
+  /// tinjau. Baru setelah user memeriksa hasilnya, bukunya disusun.
+  Future<void> _scanBook(BuildContext context) async {
+    final pages = await state.scanner.scan();
+    // Daftar kosong berarti dibatalkan — bukan kegagalan, jadi diam saja.
+    if (pages.isEmpty || !context.mounted) return;
+
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (reviewContext) => ReviewScanPage(
+        state: state,
+        pages: pages,
+        onDone: (edited, title) async {
+          final book = await state.buildScanned(edited, title: title);
+          if (!reviewContext.mounted) return;
+          if (book == null) {
+            ScaffoldMessenger.of(reviewContext).showSnackBar(
+              SnackBar(content: Text(state.error ?? 'Gagal membaca foto.')),
+            );
+            return;
+          }
+          final segments = state.previewSegments(book);
+          final stored = await Navigator.of(reviewContext).push<StoredBook?>(
+            MaterialPageRoute(
+              builder: (_) => ConfirmBookPage(
+                  state: state, book: book, segments: segments),
+            ),
+          );
+          if (stored == null || !reviewContext.mounted) return;
+          // Layar tinjau ikut ditutup: tugasnya sudah selesai, dan
+          // meninggalkannya di tumpukan membuat tombol kembali membingungkan.
+          Navigator.of(reviewContext).pop();
+          onOpen(stored);
+        },
+      ),
+    ));
   }
 
   Future<void> _pickFile(BuildContext context) async {
@@ -143,10 +181,19 @@ void showModalBarrierSheet(
             ListTile(
               key: const Key('src-camera'),
               contentPadding: EdgeInsets.zero,
-              enabled: false,
-              leading: const Icon(Icons.photo_camera_outlined, color: ink3),
+              enabled: state.scanner.available,
+              leading: Icon(Icons.photo_camera_outlined,
+                  color: state.scanner.available ? ink : ink3),
               title: const Text('Foto buku fisik'),
-              subtitle: const Text('Butuh versi Android — belum ada di web'),
+              subtitle: Text(state.scanner.available
+                  ? 'Satu bab saja sudah cukup untuk beberapa hari'
+                  : 'Hanya di versi Android — kameranya jalan di perangkat'),
+              onTap: state.scanner.available
+                  ? () {
+                      Navigator.of(sheetContext).pop();
+                      page._scanBook(context);
+                    }
+                  : null,
             ),
             const Divider(color: rule),
             ListTile(

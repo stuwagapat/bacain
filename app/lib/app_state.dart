@@ -15,6 +15,8 @@ import 'core/epub/epub_reader.dart';
 import 'core/model/book.dart';
 import 'core/pdf/pdf_reader.dart';
 import 'core/playback/keep_awake.dart';
+import 'core/scan/page_scanner.dart';
+import 'core/scan/scan_import.dart';
 import 'core/reminders/reminder_plan.dart';
 import 'core/reminders/reminders.dart';
 import 'core/store/library_store.dart';
@@ -33,6 +35,8 @@ class AppState extends ChangeNotifier {
   final Reminders reminders;
   final ReminderPlanner planner;
   final KeepAwake keepAwake;
+  final PageScanner scanner;
+  final ScanImport scanImport;
   final DateTime Function() clock;
 
   AppState({
@@ -44,11 +48,14 @@ class AppState extends ChangeNotifier {
     this.segmenter = const Segmenter(),
     Reminders? reminders,
     KeepAwake? keepAwake,
+    PageScanner? scanner,
+    this.scanImport = const ScanImport(),
     this.planner = const ReminderPlanner(),
     DateTime Function()? clock,
   })  : clock = clock ?? DateTime.now,
         reminders = reminders ?? NoopReminders(),
-        keepAwake = keepAwake ?? NoopKeepAwake() {
+        keepAwake = keepAwake ?? NoopKeepAwake(),
+        scanner = scanner ?? UnavailableScanner() {
     quota = QuotaTracker(clock: this.clock);
     player.addListener(_onPlayerChanged);
     player.onSentenceCompleted = _onSentenceCompleted;
@@ -237,6 +244,32 @@ class AppState extends ChangeNotifier {
 
   Future<Book?> parseEpub(List<int> bytes, {required String filename}) =>
       parseFile(bytes, filename: filename);
+
+  /// Halaman hasil foto — sudah lewat layar tinjau — jadi buku.
+  Future<Book?> buildScanned(
+    List<ScannedPage> pages, {
+    required String title,
+  }) async {
+    _busy = true;
+    _error = null;
+    notifyListeners();
+    try {
+      return scanImport.build(
+        pages.map((p) => p.text).toList(),
+        id: '${clock().millisecondsSinceEpoch}',
+        title: title,
+      );
+    } on ScanException catch (e) {
+      _error = e.message;
+      return null;
+    } catch (e) {
+      _error = 'Gagal menyusun buku: $e';
+      return null;
+    } finally {
+      _busy = false;
+      notifyListeners();
+    }
+  }
 
   List<Segment> previewSegments(Book book) => segmenter.segment(book);
 
