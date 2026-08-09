@@ -88,7 +88,18 @@ Itu saja. Setiap APK yang dibangun sesudah ini sudah membawa kuncinya —
 buka app, **Pengaturan → Suara AI** langsung berbunyi *"Google Cloud TTS
 aktif"*, dan daftar **Suara pembaca** sudah berisi suara Google.
 
-Untuk memicu build baru: **Actions → "Bangun APK Android" → Run workflow.**
+Untuk memicu build baru: buka **Actions → run terbaru → "Re-run all jobs"**
+(kanan atas). Secret dibaca saat build berjalan, jadi re-run pada commit yang
+sama tetap mengambil secret barumu.
+
+> Tombol **"Run workflow"** tidak muncul karena berkas workflow-nya hanya ada
+> di branch fitur. GitHub hanya menampilkan tombol itu kalau workflow-nya juga
+> ada di branch default repo (`main`).
+
+> Kalau saat menempel kuncinya ikut terbawa baris baru atau spasi, pipa-nya
+> sudah membersihkannya sendiri. Dulu tidak, dan akibatnya build gagal dengan
+> pesan `Target file "--dart-define=..." not found` yang sama sekali tidak
+> menyinggung secret.
 
 Nanti setelah `server/` terbit, ganti secret-nya jadi `BACAIN_TTS_URL` berisi
 alamat server, lalu **hapus** `BACAIN_TTS_KEY`. App otomatis memakai server —

@@ -80,10 +80,30 @@ jobs:
       - name: Bangun APK
         working-directory: app
         run: |
+          # Nilai secret dibersihkan dulu. Menempel kunci ke kotak isian
+          # GitHub gampang sekali ikut membawa baris baru di ujungnya, dan
+          # satu baris baru saja memecah perintah build — Flutter lalu
+          # mengira seluruh potongan "--dart-define=..." adalah nama berkas.
+          # Kunci maupun alamat tidak pernah punya spasi di dalamnya, jadi
+          # membuang semua spasi aman.
+          URL="$(printf '%s' "$TTS_URL" | tr -d '[:space:]')"
+          KEY="$(printf '%s' "$TTS_KEY" | tr -d '[:space:]')"
+
+          # Yang kosong tidak ikut dikirim sama sekali, bukan dikirim sebagai
+          # nilai kosong.
+          ARGS=()
+          if [ -n "$URL" ]; then ARGS+=("--dart-define=BACAIN_TTS_URL=$URL"); fi
+          if [ -n "$KEY" ]; then ARGS+=("--dart-define=BACAIN_TTS_KEY=$KEY"); fi
+
+          if [ ${#ARGS[@]} -eq 0 ]; then
+            echo "Tanpa kredensial suara AI — app akan memakai suara sistem."
+          else
+            echo "Kredensial suara AI ditanam: ${#ARGS[@]} nilai."
+          fi
+
           flutter build apk --release \
             --build-number ${{ github.run_number }} \
-            --dart-define=BACAIN_TTS_URL="$TTS_URL" \
-            --dart-define=BACAIN_TTS_KEY="$TTS_KEY"
+            "${ARGS[@]}"
 
       - name: Bersihkan kunci
         if: always()
