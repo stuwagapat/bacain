@@ -1,0 +1,1057 @@
+<title>Bacain — Seluruh Layar</title>
+
+<style>
+/* ============================================================
+   BACAIN — SELURUH LAYAR MVP · Arah Desain 03
+   Palet Arah 01 dikurangi kuning, ditambah bone dari wordmark.
+   Tinta = hijau wordmark. Ornamen diwarnai ulang ke palet.
+   Berkomitmen pada satu dunia visual: semua warna dicat eksplisit.
+   ============================================================ */
+
+:root {
+  --ground:    #0A0C0A;
+  --surface:   #141712;
+  --surface-2: #1E221B;
+  --surface-3: #272C23;
+  --line:      #2A2F27;
+  --line-soft: #1F241D;
+
+  --ink:        #001E03;
+  --text:       #EFEADA;
+  --text-muted: #8E9489;
+  --text-faint: #7C837A;
+
+  /* palet sampul — kuning listrik dikeluarkan, bone masuk dari wordmark */
+  --c-bone:      #F2EFE4;
+  --c-amber:     #F2C438;
+  --c-coral:     #F2685A;
+  --c-jingga:    #FF4A21;
+  --c-pistachio: #C6DA8B;
+  --c-sage:      #DBE3D8;
+  --c-lavender:  #A9A2C4;
+  --c-olive:     #948B12;
+
+  --accent:     #F2685A;
+  --accent-dim: #2F1B17;
+
+  --f-display: Didot, "Bodoni 72", "Bodoni MT", "Big Caslon", "Playfair Display", Georgia, serif;
+  --f-ui: "Helvetica Neue", "Arial Nova", Arial, "Liberation Sans", sans-serif;
+  --f-read: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --f-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --r-card: 20px;
+  --r-phone: 30px;
+  --r-pill: 999px;
+
+  --img-logo: url(data:image/png;base64,{{LOGO}});
+  --img-orn:  url(data:image/png;base64,{{ORN_PAL}});
+  --img-ornk: url(data:image/png;base64,{{ORN_INK}});
+}
+
+[data-accent="coral"]     { --accent: #F2685A; --accent-dim: #2F1B17; }
+[data-accent="lavender"]  { --accent: #A9A2C4; --accent-dim: #232428; }
+[data-accent="pistachio"] { --accent: #C6DA8B; --accent-dim: #282D1F; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--f-ui); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+.board { max-width: 1320px; margin: 0 auto; padding: 40px 20px 80px; }
+
+/* ---------- kepala ---------- */
+
+.masthead { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.logo-mark { width: min(290px, 72vw); aspect-ratio: 756 / 272; background: var(--img-logo) center/contain no-repeat; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+.masthead p { margin: 0; max-width: 56ch; font-size: 14.5px; line-height: 1.6; color: var(--text-muted); }
+
+.orn-rule { width: min(240px, 58vw); aspect-ratio: 853 / 322; background: var(--img-orn) center/contain no-repeat; margin: 26px auto 22px; }
+
+/* ---------- panel kontrol ---------- */
+
+.controls {
+  display: grid; gap: 14px; margin-bottom: 34px;
+  border: 1px solid var(--line-soft); border-radius: var(--r-card);
+  background: var(--surface); padding: 22px;
+}
+@media (min-width: 900px) { .controls { grid-template-columns: 320px 1fr; gap: 28px; } }
+
+.ctrl-title { margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); }
+
+.picker-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch-btn {
+  flex: 1 1 auto; min-width: 88px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: 13px;
+  background: var(--surface-2); color: var(--text-muted);
+  font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+.swatch-btn:hover { border-color: var(--text-faint); color: var(--text); }
+.swatch-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-dim); color: var(--text); }
+.swatch-chip { width: 100%; height: 24px; border-radius: 6px; }
+
+.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 7px; }
+.pal { border-radius: 12px; padding: 11px 10px 9px; color: var(--ink); min-height: 84px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+.pal-name { font-size: 12px; font-weight: 700; }
+.pal-meta { display: flex; justify-content: space-between; gap: 6px; font-family: var(--f-mono); font-size: 9.5px; color: rgba(0,30,3,.66); font-variant-numeric: tabular-nums; }
+.pal-out { border: 1px dashed var(--line); color: var(--text-faint); }
+.pal-out .pal-name { text-decoration: line-through; }
+.pal-out .pal-meta { color: var(--text-faint); display: block; }
+
+/* ---------- alur ---------- */
+
+.flow { margin-top: 44px; }
+
+.flow-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.flow-n { font-family: var(--f-mono); font-size: 12px; color: var(--accent); font-variant-numeric: tabular-nums; transition: color .35s ease; }
+.flow-head h2 { margin: 0; font-family: var(--f-display); font-size: 27px; font-weight: 400; color: var(--text); }
+.flow-head p { margin: 0; flex: 1 1 260px; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+
+.rack { display: grid; grid-template-columns: repeat(auto-fill, minmax(312px, 1fr)); gap: 26px 18px; padding-top: 24px; justify-items: center; }
+
+.stage { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 340px; }
+.stage-cap { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.stage-cap h3 { margin: 0; font-size: 14px; font-weight: 800; letter-spacing: -0.015em; color: var(--text); }
+.stage-cap span { font-size: 11.5px; color: var(--text-faint); text-align: right; }
+.stage-note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-muted); }
+
+.phone-wrap { --s: 0.84; width: calc(360px * var(--s)); height: calc(760px * var(--s)); align-self: center; }
+@media (min-width: 420px) { .phone-wrap { --s: 0.88; } }
+
+.phone {
+  width: 360px; height: 760px; transform: scale(var(--s)); transform-origin: top left;
+  border-radius: var(--r-phone); background: var(--ground); border: 1px solid var(--line);
+  overflow: hidden; display: flex; flex-direction: column; font-size: 14px; position: relative;
+}
+.phone-light { background: var(--accent); transition: background .35s ease; }
+
+.statusbar { display: flex; justify-content: space-between; padding: 12px 20px 2px; font-size: 11px; font-weight: 700; color: var(--text-faint); font-variant-numeric: tabular-nums; flex: none; }
+.phone-light .statusbar { color: rgba(0,30,3,.5); }
+
+.screen { flex: 1; min-height: 0; overflow: hidden; padding: 8px 20px 0; display: flex; flex-direction: column; }
+.screen-pad0 { padding-left: 0; padding-right: 0; }
+
+/* ---------- komponen bersama ---------- */
+
+.topbar { display: flex; align-items: center; gap: 12px; padding: 8px 0 16px; flex: none; color: var(--text-muted); }
+.topbar svg { width: 19px; height: 19px; display: block; flex: none; }
+.topbar-title { flex: 1; font-size: 14.5px; font-weight: 700; color: var(--text); }
+.topbar-aside { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+.app-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 18px; flex: none; }
+.app-logo { width: 92px; aspect-ratio: 756 / 272; background: var(--img-logo) left center/contain no-repeat; }
+
+.icon-btn { width: 34px; height: 34px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--text-muted); flex: none; }
+.icon-btn svg { width: 16px; height: 16px; display: block; }
+
+.h-display { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 30px; line-height: 1.12; color: var(--text); text-wrap: balance; }
+.h-sub { margin: 10px 0 0; font-size: 14.5px; line-height: 1.55; color: var(--text-muted); }
+
+.label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: var(--r-pill); padding: 16px; font-size: 15px; font-weight: 700; flex: none;
+}
+.btn svg { width: 15px; height: 15px; display: block; }
+.btn-primary { background: var(--accent); color: var(--ink); transition: background .35s ease; }
+.btn-outline { border: 1px solid var(--line); color: var(--text); }
+.btn-ghost { padding: 14px; font-size: 14px; font-weight: 700; color: var(--text-faint); text-align: center; flex: none; }
+.btn-ink { background: var(--ink); color: var(--c-bone); }
+
+.field { border: 1px solid var(--line); border-radius: 13px; padding: 14px 15px; font-size: 15px; color: var(--text); background: var(--surface); }
+
+.dots { display: flex; justify-content: center; gap: 7px; padding: 22px 0 18px; flex: none; }
+.dot { width: 7px; height: 7px; border-radius: var(--r-pill); background: var(--surface-3); }
+.dot-on { background: var(--accent); width: 20px; transition: background .35s ease; }
+
+.spacer { flex: 1; min-height: 0; }
+.stack { display: flex; flex-direction: column; gap: 9px; flex: none; }
+
+.cover { border-radius: 9px; flex: none; display: flex; align-items: flex-end; padding: 8px; font-family: var(--f-display); font-size: 11px; line-height: 1.1; color: var(--ink); overflow: hidden; }
+
+.bar { height: 7px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
+.bar > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); transition: background .35s ease; }
+.bar-ink { height: 6px; border-radius: var(--r-pill); background: rgba(0,30,3,.18); overflow: hidden; }
+.bar-ink > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--ink); }
+
+.mini { margin-top: auto; height: 64px; flex: none; display: flex; align-items: center; gap: 11px; padding: 0 4px; border-top: 1px solid var(--line-soft); }
+.mini-cover { width: 38px; height: 38px; border-radius: 8px; flex: none; }
+.mini-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mini-title { font-size: 12.5px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-sub { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.mini-btn { width: 38px; height: 38px; border-radius: var(--r-pill); background: var(--accent); color: var(--ink); display: grid; place-items: center; flex: none; transition: background .35s ease; }
+.mini-btn svg { width: 13px; height: 13px; display: block; }
+
+.orn-art { width: 240px; aspect-ratio: 853 / 322; background: var(--img-orn) center/contain no-repeat; margin: 0 auto; flex: none; }
+.orn-art-ink { background-image: var(--img-ornk); }
+
+/* ---------- onboarding: cara kerja ---------- */
+
+.how { display: flex; flex-direction: column; gap: 18px; flex: none; }
+.how-row { display: flex; gap: 14px; align-items: flex-start; }
+.how-icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; flex: none; color: var(--ink); }
+.how-icon svg { width: 20px; height: 20px; display: block; }
+.how-t { margin: 0 0 3px; font-size: 15.5px; font-weight: 700; color: var(--text); }
+.how-d { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+
+/* ---------- time picker ---------- */
+
+.clock { border: 1px solid var(--line); border-radius: 18px; padding: 22px; text-align: center; flex: none; background: var(--surface); }
+.clock-val { font-family: var(--f-display); font-size: 58px; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+.clock-val i { font-style: normal; color: var(--text-faint); padding: 0 6px; }
+
+.presets { display: flex; gap: 8px; flex: none; }
+.preset { flex: 1; text-align: center; padding: 12px 0; border-radius: var(--r-pill); border: 1px solid var(--line); font-size: 13.5px; font-weight: 700; color: var(--text-muted); }
+.preset-on { background: var(--accent); border-color: transparent; color: var(--ink); transition: background .35s ease; }
+
+/* ---------- bottom sheet ---------- */
+
+.scrim { position: absolute; inset: 0; background: rgba(4, 6, 4, .72); }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface);
+  border-radius: 26px 26px 0 0; padding: 12px 20px 24px; display: flex; flex-direction: column; gap: 4px;
+  border-top: 1px solid var(--line);
+}
+.sheet-handle { width: 38px; height: 4px; border-radius: var(--r-pill); background: var(--surface-3); margin: 0 auto 14px; }
+.sheet h3 { margin: 0 0 10px; font-family: var(--f-display); font-size: 22px; font-weight: 400; color: var(--text); }
+
+.opt { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line-soft); }
+.opt:first-of-type { border-top: none; }
+.opt-icon { width: 42px; height: 42px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; color: var(--text); flex: none; }
+.opt-icon svg { width: 19px; height: 19px; display: block; }
+.opt-t { margin: 0 0 2px; font-size: 15px; font-weight: 700; color: var(--text); }
+.opt-d { margin: 0; font-size: 12.5px; color: var(--text-faint); }
+.opt-soon { opacity: .45; }
+
+/* ---------- tinjau scan ---------- */
+
+.pager { display: flex; align-items: center; gap: 10px; flex: none; color: var(--text-faint); }
+.pager svg { width: 18px; height: 18px; display: block; flex: none; }
+.page-img { flex: 1; height: 168px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); padding: 16px 14px; display: flex; flex-direction: column; gap: 7px; justify-content: center; overflow: hidden; }
+.page-line { height: 5px; border-radius: 3px; background: var(--surface-3); }
+.page-count { text-align: center; font-size: 11.5px; color: var(--text-faint); padding: 9px 0 14px; flex: none; font-variant-numeric: tabular-nums; }
+
+.ocr { border: 1px solid var(--line); border-radius: 13px; padding: 14px; font-family: var(--f-read); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--surface); position: relative; flex: none; }
+.ocr .sus { border-bottom: 2px dotted var(--c-amber); color: var(--c-amber); }
+.ocr-edit { position: absolute; right: 12px; bottom: 10px; color: var(--text-faint); }
+.ocr-edit svg { width: 15px; height: 15px; display: block; }
+
+.warn { display: flex; align-items: center; gap: 8px; padding: 11px 0 0; font-size: 12.5px; color: var(--c-amber); flex: none; }
+.warn svg { width: 15px; height: 15px; display: block; flex: none; }
+
+.danger { display: flex; align-items: center; gap: 8px; padding: 14px 0; font-size: 13.5px; font-weight: 700; color: var(--c-jingga); flex: none; }
+.danger svg { width: 15px; height: 15px; display: block; }
+
+/* ---------- konfirmasi buku ---------- */
+
+.estimate { background: var(--c-bone); color: var(--ink); border-radius: var(--r-card); padding: 16px 18px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+.est-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; color: rgba(0,30,3,.68); font-variant-numeric: tabular-nums; }
+.est-hero { display: flex; align-items: baseline; gap: 8px; padding-top: 8px; margin-top: 6px; border-top: 1px solid rgba(0,30,3,.16); }
+.est-num { font-family: var(--f-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+.est-cap { font-size: 13.5px; font-weight: 700; line-height: 1.25; }
+
+.linkrow { display: flex; align-items: center; gap: 7px; padding: 12px 0 0; font-size: 13.5px; font-weight: 700; color: var(--text-muted); flex: none; }
+.linkrow svg { width: 13px; height: 13px; display: block; }
+
+.voice { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; flex: none; }
+.voice-row { display: flex; align-items: center; gap: 12px; padding: 14px 15px; border-top: 1px solid var(--line-soft); }
+.voice-row:first-child { border-top: none; }
+.radio { width: 18px; height: 18px; border-radius: var(--r-pill); border: 2px solid var(--line); flex: none; }
+.radio-on { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 42%, transparent 44%); transition: border-color .35s ease, background .35s ease; }
+.voice-n { flex: 1; font-size: 14.5px; font-weight: 700; color: var(--text); }
+.voice-g { font-size: 12.5px; color: var(--text-faint); }
+.voice-p { width: 30px; height: 30px; border-radius: var(--r-pill); border: 1px solid var(--line); display: grid; place-items: center; color: var(--text-muted); flex: none; }
+.voice-p svg { width: 11px; height: 11px; display: block; }
+
+/* ---------- detail buku ---------- */
+
+.detail-head { display: flex; gap: 15px; flex: none; }
+.detail-meta { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+.detail-title { font-family: var(--f-display); font-size: 24px; line-height: 1.1; color: var(--text); }
+.detail-author { font-size: 13.5px; color: var(--text-muted); }
+.detail-stat { font-size: 12.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+.chapters { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.chap { display: flex; align-items: center; gap: 11px; padding: 11px 0; border-top: 1px solid var(--line-soft); font-size: 13.5px; }
+.chap-mark { width: 17px; height: 17px; display: grid; place-items: center; flex: none; }
+.chap-mark svg { width: 13px; height: 13px; display: block; }
+.chap-n { width: 14px; color: var(--text-faint); font-variant-numeric: tabular-nums; flex: none; font-size: 12px; }
+.chap-t { flex: 1; min-width: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chap-d { color: var(--text-faint); font-size: 12px; font-variant-numeric: tabular-nums; flex: none; }
+.chap-done .chap-t, .chap-done .chap-d { color: var(--text-faint); }
+.chap-now { color: var(--accent); transition: color .35s ease; }
+.chap-now .chap-t { color: var(--text); font-weight: 700; }
+.chap-soon .chap-t, .chap-soon .chap-d { color: var(--text-faint); opacity: .62; }
+
+/* ---------- recap ---------- */
+
+.recap-body { font-family: var(--f-read); font-size: 18px; line-height: 1.68; color: var(--text); text-align: center; max-width: 27ch; margin: 0 auto; }
+
+.eq { display: flex; align-items: flex-end; justify-content: center; gap: 4px; height: 26px; padding: 26px 0; flex: none; }
+.eq i { width: 3px; border-radius: 2px; background: var(--accent); transition: background .35s ease; animation: eq 1.1s ease-in-out infinite; }
+.eq i:nth-child(1) { height: 30%; animation-delay: 0s; }
+.eq i:nth-child(2) { height: 70%; animation-delay: .16s; }
+.eq i:nth-child(3) { height: 100%; animation-delay: .32s; }
+.eq i:nth-child(4) { height: 55%; animation-delay: .48s; }
+.eq i:nth-child(5) { height: 25%; animation-delay: .64s; }
+@keyframes eq { 0%, 100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
+
+/* ---------- player ---------- */
+
+.player-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0 4px; flex: none; color: var(--text-muted); }
+.player-bar svg { width: 17px; height: 17px; display: block; }
+.player-chap { font-size: 11px; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; color: var(--text-faint); }
+.player-title { margin: 0; padding: 6px 0 18px; font-family: var(--f-display); font-size: 25px; font-weight: 400; color: var(--text); flex: none; text-wrap: balance; }
+
+.reader { flex: 1; min-height: 0; overflow: hidden; font-family: var(--f-read); font-size: 17px; line-height: 1.68; display: flex; flex-direction: column; gap: 13px; }
+.reader p { margin: 0; }
+.ln-past { color: var(--text-faint); }
+.ln-future { color: var(--text-muted); }
+.ln-active {
+  color: var(--text); background: var(--accent-dim); border-left: 3px solid var(--accent);
+  margin-left: -13px; padding: 3px 10px; border-radius: 0 8px 8px 0;
+  transition: background .35s ease, border-color .35s ease;
+}
+
+.scrub { flex: none; padding-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.scrub-track { height: 3px; border-radius: var(--r-pill); background: var(--surface-2); position: relative; }
+.scrub-fill { position: absolute; inset: 0 auto 0 0; width: 44%; border-radius: var(--r-pill); background: var(--accent); transition: background .35s ease; }
+.scrub-knob { position: absolute; top: 50%; left: 44%; width: 11px; height: 11px; border-radius: var(--r-pill); background: var(--accent); transform: translate(-50%, -50%); transition: background .35s ease; }
+.scrub-times { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+.transport { flex: none; display: flex; align-items: center; justify-content: center; gap: 30px; padding: 18px 0 14px; }
+.skip { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--text-muted); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.skip svg { width: 23px; height: 23px; display: block; }
+.big-btn { width: 68px; height: 68px; border-radius: var(--r-pill); background: var(--accent); color: var(--ink); display: grid; place-items: center; flex: none; transition: background .35s ease; }
+.big-btn svg { width: 22px; height: 22px; display: block; }
+
+.player-foot { flex: none; height: 56px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.player-foot b { color: var(--text); font-weight: 700; }
+
+/* mode fokus */
+.focus { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 0; text-align: center; }
+.focus-book { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3F443D; }
+.focus-chap { font-size: 12px; color: #333831; padding-top: 4px; }
+.focus-ln { font-family: var(--f-read); font-size: 22px; line-height: 1.55; color: #A8AEA2; padding: 40px 6px; text-wrap: balance; }
+.focus-transport { display: flex; align-items: center; justify-content: center; gap: 34px; color: #4B514A; padding-bottom: 14px; }
+.focus-transport svg { width: 22px; height: 22px; display: block; }
+.focus-transport .fp svg { width: 26px; height: 26px; }
+.focus-scrub { height: 2px; background: #23271F; border-radius: var(--r-pill); position: relative; }
+.focus-scrub i { position: absolute; inset: 0 auto 0 0; width: 44%; background: #4B514A; border-radius: var(--r-pill); }
+
+/* ---------- jatah habis ---------- */
+
+.finish { flex: 1; min-height: 0; padding: 8px 24px 26px; display: flex; flex-direction: column; color: var(--ink); text-align: center; }
+.finish-back { align-self: flex-start; padding: 6px 0 0; color: rgba(0,30,3,.6); }
+.finish-back svg { width: 19px; height: 19px; display: block; }
+.finish-num { margin-top: 10px; font-family: var(--f-display); font-size: 104px; line-height: .9; font-variant-numeric: tabular-nums; }
+.finish-unit { font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(0,30,3,.56); padding-top: 10px; }
+.finish-head { margin: 20px 0 0; font-family: var(--f-display); font-size: 26px; font-weight: 400; line-height: 1.16; text-wrap: balance; }
+.finish-body { margin: 11px auto 0; font-size: 14px; line-height: 1.55; color: rgba(0,30,3,.7); max-width: 27ch; }
+.finish-actions { margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 4px; }
+.finish-ghost { padding: 13px; font-size: 14px; font-weight: 700; color: rgba(0,30,3,.6); text-align: center; }
+
+/* ---------- pengaturan ---------- */
+
+.settings { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.set-group { padding-top: 18px; flex: none; }
+.set-group:first-child { padding-top: 2px; }
+.set-group > .label { display: block; padding-bottom: 4px; }
+.set-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line-soft); font-size: 14.5px; color: var(--text); }
+.set-row:first-of-type { border-top: none; }
+.set-name { flex: 1; }
+.set-val { font-size: 13.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.set-row svg { width: 15px; height: 15px; display: block; color: var(--text-faint); flex: none; }
+.toggle { width: 40px; height: 23px; border-radius: var(--r-pill); background: var(--accent); position: relative; flex: none; transition: background .35s ease; }
+.toggle::after { content: ""; position: absolute; top: 3px; right: 3px; width: 17px; height: 17px; border-radius: var(--r-pill); background: var(--ink); }
+.set-hint { font-size: 12.5px; color: var(--text-faint); padding: 6px 0 0; line-height: 1.45; }
+
+/* ---------- notifikasi ---------- */
+
+.notif-stage { display: flex; align-items: center; justify-content: center; padding: 6px; }
+.notif {
+  width: 100%; max-width: 320px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 18px; padding: 14px 15px; display: flex; gap: 12px; align-items: flex-start;
+}
+.notif-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--ink); display: grid; place-items: center; flex: none; transition: background .35s ease; }
+.notif-icon svg { width: 15px; height: 15px; display: block; }
+.notif-b { min-width: 0; flex: 1; }
+.notif-app { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-faint); padding-bottom: 3px; font-variant-numeric: tabular-nums; }
+.notif-t { font-size: 14.5px; font-weight: 700; color: var(--text); }
+.notif-d { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- catatan kaki ---------- */
+
+.footnote { margin-top: 52px; padding-top: 26px; border-top: 1px solid var(--line); display: grid; gap: 20px; }
+@media (min-width: 800px) { .footnote { grid-template-columns: 1fr 1fr; gap: 38px; } }
+.footnote h4 { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); }
+.footnote p { margin: 0 0 10px; font-size: 13.5px; line-height: 1.65; color: var(--text-muted); }
+.footnote strong { color: var(--text); }
+code { font-family: var(--f-mono); font-size: 12px; color: var(--text); background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="board" data-accent="coral" id="board">
+
+  <header class="masthead">
+    <div class="logo-mark" role="img" aria-label="Bacain"></div>
+    <p class="eyebrow">Arah Desain 03 · Seluruh layar MVP</p>
+    <p>Empat belas layar, palet Arah&nbsp;01 tanpa kuning, ornamen diwarnai ulang ke palet. Isi tiap layar diambil apa adanya dari <code>docs/rencana-mvp.md</code>.</p>
+  </header>
+
+  <div class="orn-rule" role="presentation"></div>
+
+  <!-- ===================== KONTROL ===================== -->
+  <div class="controls">
+    <div>
+      <h2 class="ctrl-title">Aksen merek</h2>
+      <div class="picker-row" role="group" aria-label="Pilih warna aksen">
+        <button type="button" class="swatch-btn" data-set="coral" aria-pressed="true"><span class="swatch-chip" style="background:var(--c-coral)"></span>Coral</button>
+        <button type="button" class="swatch-btn" data-set="lavender" aria-pressed="false"><span class="swatch-chip" style="background:var(--c-lavender)"></span>Lavender</button>
+        <button type="button" class="swatch-btn" data-set="pistachio" aria-pressed="false"><span class="swatch-chip" style="background:var(--c-pistachio)"></span>Pistachio</button>
+      </div>
+      <p class="stage-note" id="accent-note" style="margin-top:12px;">Coral — kelopak oranye ornamen yang diturunkan sedikit. Hangat, mudah diingat, dan satu-satunya kandidat yang sudah hadir di aset kamu.</p>
+    </div>
+    <div>
+      <h2 class="ctrl-title">Palet sampul — rasio terhadap tinta #001E03</h2>
+      <div class="palette">
+        <div class="pal" style="background:var(--c-bone)"><span class="pal-name">Bone</span><span class="pal-meta"><span>#F2EFE4</span><span>15.4</span></span></div>
+        <div class="pal" style="background:var(--c-sage)"><span class="pal-name">Sage</span><span class="pal-meta"><span>#DBE3D8</span><span>13.5</span></span></div>
+        <div class="pal" style="background:var(--c-pistachio)"><span class="pal-name">Pistachio</span><span class="pal-meta"><span>#C6DA8B</span><span>11.6</span></span></div>
+        <div class="pal" style="background:var(--c-amber)"><span class="pal-name">Amber</span><span class="pal-meta"><span>#F2C438</span><span>10.7</span></span></div>
+        <div class="pal" style="background:var(--c-lavender)"><span class="pal-name">Lavender</span><span class="pal-meta"><span>#A9A2C4</span><span>7.3</span></span></div>
+        <div class="pal" style="background:var(--c-coral)"><span class="pal-name">Coral</span><span class="pal-meta"><span>#F2685A</span><span>5.8</span></span></div>
+        <div class="pal" style="background:var(--c-jingga)"><span class="pal-name">Jingga</span><span class="pal-meta"><span>#FF4A21</span><span>5.3</span></span></div>
+        <div class="pal" style="background:var(--c-olive)"><span class="pal-name">Olive</span><span class="pal-meta"><span>#948B12</span><span>5.0</span></span></div>
+        <div class="pal pal-out"><span class="pal-name">Kuning</span><span class="pal-meta">#EDE300<br>dikeluarkan</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ALUR 1 ===================== -->
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Alur 01</span>
+      <h2>Masuk pertama kali</h2>
+      <p>Auth anonim jalan diam-diam — user tidak pernah melihat layar login. Hanya satu pertanyaan diajukan.</p>
+    </div>
+    <div class="rack">
+
+      <!-- 1 · Onboarding 1 -->
+      <div class="stage">
+        <div class="stage-cap"><h3>1 · Onboarding — janji</h3><span>Layar 1 dari 3</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="spacer"></div>
+            <div class="orn-art"></div>
+            <div style="padding-top:34px;flex:none;">
+              <h2 class="h-display">Buku yang menumpuk, akhirnya kebaca.</h2>
+              <p class="h-sub">Foto bukumu, dengarkan satu bab tiap hari.</p>
+            </div>
+            <div class="spacer"></div>
+            <div class="dots"><span class="dot dot-on"></span><span class="dot"></span><span class="dot"></span></div>
+            <div class="stack" style="padding-bottom:14px;">
+              <span class="btn btn-primary">Lanjut</span>
+              <span class="btn-ghost">Lewati</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Ornamen mengisi slot ilustrasi. Nada tulisan hangat dan personal — dokumen rencana melarang bahasa tool produktivitas seperti "optimalkan".</p>
+      </div>
+
+      <!-- 2 · Onboarding 2 -->
+      <div class="stage">
+        <div class="stage-cap"><h3>1 · Onboarding — cara kerja</h3><span>Layar 2 dari 3</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="spacer"></div>
+            <h2 class="h-display" style="padding-bottom:30px;">Tiga langkah, tiap hari.</h2>
+            <div class="how">
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-pistachio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+                <span><p class="how-t">Foto satu bab</p><p class="how-d">Bukan seluruh buku. Cukup jatah dengar hari ini.</p></span>
+              </div>
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-lavender)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>
+                <span><p class="how-t">Dengarkan 15 menit</p><p class="how-d">Teksnya ikut jalan di layar, jadi bisa diikuti sambil melihat.</p></span>
+              </div>
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+                <span><p class="how-t">Besok lanjut lagi</p><p class="how-d">Kami ingatkan sekali sehari. Sebulan, satu buku selesai.</p></span>
+              </div>
+            </div>
+            <div class="spacer"></div>
+            <div class="dots"><span class="dot"></span><span class="dot dot-on"></span><span class="dot"></span></div>
+            <div class="stack" style="padding-bottom:14px;">
+              <span class="btn btn-primary">Lanjut</span>
+              <span class="btn-ghost">Lewati</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Tiga ikon memakai tiga warna sampul yang berbeda — perkenalan diam-diam pada palet sebelum user melihat rak.</p>
+      </div>
+
+      <!-- 3 · Jam dengar -->
+      <div class="stage">
+        <div class="stage-cap"><h3>2 · Pilih jam dengar</h3><span>Satu-satunya pertanyaan</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+            <h2 class="h-display">Kapan kamu mau dengar?</h2>
+            <p class="h-sub">Kami ingatkan sekali sehari, di jam ini.</p>
+            <div class="spacer"></div>
+            <div class="clock"><span class="clock-val">07<i>:</i>00</span></div>
+            <div class="presets" style="padding-top:14px;">
+              <span class="preset preset-on">Pagi</span>
+              <span class="preset">Siang</span>
+              <span class="preset">Malam</span>
+            </div>
+            <p class="stage-note" style="text-align:center;padding-top:16px;">Bisa diubah kapan saja.</p>
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:20px;"><span class="btn btn-primary">Selesai</span></div>
+          </div>
+        </div></div>
+        <p class="stage-note">Angka jam memakai huruf display — satu-satunya tempat di app selain judul yang boleh memakainya, karena ini momen keputusan.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== ALUR 2 ===================== -->
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Alur 02</span>
+      <h2>Rak</h2>
+      <p>Beranda kosong adalah layar paling menentukan — dilihat 100% user baru, dan tempat sebagian besar memutuskan berhenti atau lanjut.</p>
+    </div>
+    <div class="rack">
+
+      <!-- 4 · Beranda kosong -->
+      <div class="stage">
+        <div class="stage-cap"><h3>3a · Beranda — rak kosong</h3><span>Layar penentu</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="app-bar">
+              <div class="app-logo" role="img" aria-label="Bacain"></div>
+              <span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 16.11 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.43 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+            </div>
+            <div class="spacer"></div>
+            <div class="orn-art" style="width:210px;"></div>
+            <div style="padding-top:26px;text-align:center;flex:none;">
+              <h2 class="h-display" style="font-size:26px;">Raknya masih kosong</h2>
+              <p class="h-sub" style="max-width:26ch;margin-left:auto;margin-right:auto;">Mulai dari buku yang paling lama kamu tunda.</p>
+            </div>
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:24px;">
+              <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto buku fisik</span>
+              <span class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>Pilih file PDF atau EPUB</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa".</p>
+      </div>
+
+      <!-- 5 · Beranda terisi -->
+      <div class="stage">
+        <div class="stage-cap"><h3>3b · Beranda — terisi</h3><span>Layar utama harian</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="app-bar">
+              <div class="app-logo" role="img" aria-label="Bacain"></div>
+              <span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 16.11 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.43 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+            </div>
+
+            <div style="flex:none;padding-bottom:20px;display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <span class="label">Sisa hari ini</span>
+                <span style="font-size:26px;font-weight:800;letter-spacing:-.035em;color:var(--text);font-variant-numeric:tabular-nums;">18<small style="font-size:13px;color:var(--text-muted);margin-left:3px;">menit</small></span>
+              </div>
+              <div class="bar"><i style="width:60%"></i></div>
+            </div>
+
+            <div style="background:var(--accent);color:var(--ink);border-radius:var(--r-card);padding:18px;display:flex;flex-direction:column;gap:14px;flex:none;transition:background .35s ease;">
+              <span style="font-size:10.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:rgba(0,30,3,.55);">Lanjutkan</span>
+              <div style="display:flex;gap:14px;align-items:center;">
+                <span class="cover" style="width:52px;height:70px;background:var(--c-lavender)">Filosofi Teras</span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+                  <span style="font-family:var(--f-display);font-size:21px;line-height:1.1;">Filosofi Teras</span>
+                  <span style="font-size:12.5px;font-weight:600;color:rgba(0,30,3,.66);font-variant-numeric:tabular-nums;">Bab 4 · sisa 14 menit</span>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span class="bar-ink" style="flex:1"><i style="width:38%"></i></span>
+                <span style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:rgba(0,30,3,.76);">38%</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--c-bone);border-radius:var(--r-pill);padding:11px 20px;font-size:14px;font-weight:700;">
+                  <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;display:block;"><path d="M8 5v14l11-7z"/></svg>Putar
+                </span>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:baseline;justify-content:space-between;padding:22px 0 12px;flex:none;">
+              <h4 style="margin:0;font-family:var(--f-display);font-size:18px;font-weight:400;color:var(--text);">Rak kamu</h4>
+              <span style="font-size:12px;color:var(--text-faint);">3 buku</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;">
+              <div style="background:var(--surface);border-radius:16px;padding:12px;display:flex;gap:11px;align-items:center;min-width:0;">
+                <span style="width:38px;height:52px;border-radius:7px;background:var(--c-pistachio);flex:none;"></span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:12.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Atomic Habits</span>
+                  <span style="font-size:11px;color:var(--text-faint);font-variant-numeric:tabular-nums;">12%</span>
+                </span>
+              </div>
+              <div style="background:var(--surface);border-radius:16px;padding:12px;display:flex;gap:11px;align-items:center;min-width:0;">
+                <span style="width:38px;height:52px;border-radius:7px;background:var(--c-sage);flex:none;"></span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:12.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Sapiens</span>
+                  <span style="font-size:11px;color:var(--text-faint);">Belum mulai</span>
+                </span>
+              </div>
+              <div style="border:1px dashed var(--line);border-radius:16px;padding:12px;display:flex;gap:8px;align-items:center;justify-content:center;color:var(--text-muted);font-size:12.5px;font-weight:700;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;display:block;"><path d="M12 5v14M5 12h14"/></svg>Tambah
+              </div>
+            </div>
+
+            <div class="mini">
+              <span class="mini-cover" style="background:var(--c-lavender)"></span>
+              <span class="mini-meta"><span class="mini-title">Filosofi Teras</span><span class="mini-sub">Bab 4 · 6:12</span></span>
+              <span class="mini-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Satu-satunya bidang warna besar adalah kartu LANJUTKAN — karena ia satu-satunya aksi utama. Rak dua kolom, tidak pernah tiga.</p>
+      </div>
+
+      <!-- 6 · Detail buku -->
+      <div class="stage">
+        <div class="stage-cap"><h3>7 · Detail buku</h3><span>Daftar bab</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="topbar-title"></span>
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+            </div>
+
+            <div class="detail-head">
+              <span class="cover" style="width:78px;height:106px;background:var(--c-lavender)">Filosofi Teras</span>
+              <span class="detail-meta">
+                <span class="detail-title">Filosofi Teras</span>
+                <span class="detail-author">Henry Manampiring</span>
+                <span class="detail-stat">12 bab · 4j 20m</span>
+              </span>
+            </div>
+
+            <div style="padding:18px 0 4px;flex:none;display:flex;align-items:center;gap:11px;">
+              <span class="bar" style="flex:1"><i style="width:38%"></i></span>
+              <span style="font-size:12px;font-weight:800;color:var(--text-muted);font-variant-numeric:tabular-nums;">38%</span>
+            </div>
+
+            <div class="stack" style="padding:16px 0 20px;">
+              <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Dengarkan Bab 4</span>
+            </div>
+
+            <span class="label">Daftar bab</span>
+            <div class="chapters" style="padding-top:4px;">
+              <div class="chap chap-done" style="border-top:none;"><span class="chap-mark" style="color:var(--c-pistachio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></span><span class="chap-n">1</span><span class="chap-t">Sebuah Undangan</span><span class="chap-d">12m</span></div>
+              <div class="chap chap-done"><span class="chap-mark" style="color:var(--c-pistachio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></span><span class="chap-n">2</span><span class="chap-t">Sekelumit Filsafat</span><span class="chap-d">13m</span></div>
+              <div class="chap chap-done"><span class="chap-mark" style="color:var(--c-pistachio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></span><span class="chap-n">3</span><span class="chap-t">Hidup Selaras Alam</span><span class="chap-d">15m</span></div>
+              <div class="chap chap-now"><span class="chap-mark"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg></span><span class="chap-n">4</span><span class="chap-t">Dikotomi Kendali</span><span class="chap-d">14m</span></div>
+              <div class="chap chap-soon"><span class="chap-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></span><span class="chap-n">5</span><span class="chap-t">Memperjelas Nilai</span><span class="chap-d">16m</span></div>
+              <div class="chap chap-soon"><span class="chap-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></span><span class="chap-n">6</span><span class="chap-t">Hidup Berkebajikan</span><span class="chap-d">—</span></div>
+              <div class="chap chap-soon"><span class="chap-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></span><span class="chap-n">7</span><span class="chap-t">Mengelola Emosi</span><span class="chap-d">—</span></div>
+            </div>
+
+            <div class="mini">
+              <span class="mini-cover" style="background:var(--c-lavender)"></span>
+              <span class="mini-meta"><span class="mini-title">Filosofi Teras</span><span class="mini-sub">Bab 4 · 6:12</span></span>
+              <span class="mini-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Tiga status bab dibedakan bentuk, bukan warna saja: centang (sudah), lingkaran penuh (siap), lingkaran kosong redup (belum disintesis).</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== ALUR 3 ===================== -->
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Alur 03</span>
+      <h2>Menambah buku</h2>
+      <p>Layar kamera dan file picker tidak didesain — keduanya disediakan sistem (ML Kit Document Scanner dan picker Android).</p>
+    </div>
+    <div class="rack">
+
+      <!-- 7 · Sheet tambah buku -->
+      <div class="stage">
+        <div class="stage-cap"><h3>4 · Tambah buku</h3><span>Bottom sheet</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="app-bar">
+              <div class="app-logo" role="img" aria-label="Bacain"></div>
+              <span class="icon-btn"></span>
+            </div>
+            <div style="flex:none;padding-bottom:20px;display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <span class="label">Sisa hari ini</span>
+                <span style="font-size:26px;font-weight:800;color:var(--text);">18</span>
+              </div>
+              <div class="bar"><i style="width:60%"></i></div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:var(--r-card);height:150px;flex:none;"></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <span class="sheet-handle"></span>
+            <h3>Tambah buku</h3>
+            <div class="opt">
+              <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+              <span><p class="opt-t">Foto buku fisik</p><p class="opt-d">Scan per halaman</p></span>
+            </div>
+            <div class="opt">
+              <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg></span>
+              <span><p class="opt-t">Pilih file</p><p class="opt-d">PDF atau EPUB</p></span>
+            </div>
+            <div class="opt opt-soon">
+              <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+              <span><p class="opt-t">Cerita rakyat</p><p class="opt-d">Gratis · segera</p></span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Beranda meredup di belakang, tidak hilang — user tetap tahu ia sedang di atas rak, bukan pindah layar.</p>
+      </div>
+
+      <!-- 8 · Tinjau scan -->
+      <div class="stage">
+        <div class="stage-cap"><h3>5 · Tinjau hasil scan</h3><span>Pengakuan jujur soal OCR</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="topbar-title">Periksa hasil</span>
+              <span class="topbar-aside">12 hal</span>
+            </div>
+
+            <div class="pager">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              <span class="page-img">
+                <span class="page-line" style="width:88%"></span><span class="page-line" style="width:96%"></span>
+                <span class="page-line" style="width:72%"></span><span class="page-line" style="width:92%"></span>
+                <span class="page-line" style="width:84%"></span><span class="page-line" style="width:46%"></span>
+              </span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <p class="page-count">Halaman 3 dari 12</p>
+
+            <div class="ocr">
+              Manusia adalah makhluk <span class="sus">sosial</span> yang tidak bisa hidup <span class="sus">sendiri</span>, dan justru dari sanalah sebagian besar kegelisahan kita lahir…
+              <span class="ocr-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+            </div>
+
+            <div class="warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              2 kata mungkin keliru — ketuk untuk perbaiki
+            </div>
+
+            <div class="danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Hapus halaman ini
+            </div>
+
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:20px;"><span class="btn btn-primary">Lanjut</span></div>
+          </div>
+        </div></div>
+        <p class="stage-note">Kata ragu ditandai amber bergaris titik — warna status, bukan warna sampul. Ini satu-satunya tempat warna dipakai untuk memberi arti.</p>
+      </div>
+
+      <!-- 9 · Konfirmasi buku -->
+      <div class="stage">
+        <div class="stage-cap"><h3>6 · Konfirmasi &amp; pilih suara</h3><span>Momen paling penting</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="topbar-title">Buku baru</span>
+            </div>
+
+            <span class="label">Judul</span>
+            <div class="field" style="margin:8px 0 18px;">Filosofi Teras</div>
+
+            <div class="estimate">
+              <div class="est-row"><span>Bab ditemukan</span><span style="font-weight:700;">12</span></div>
+              <div class="est-row"><span>Total durasi</span><span style="font-weight:700;">± 4 jam 20 menit</span></div>
+              <div class="est-hero">
+                <span class="est-num">18</span>
+                <span class="est-cap">hari<br>dengar</span>
+              </div>
+            </div>
+
+            <div class="linkrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+              Lihat &amp; koreksi bab
+            </div>
+
+            <span class="label" style="padding-top:20px;display:block;">Suara pembaca</span>
+            <div class="voice" style="margin-top:9px;">
+              <div class="voice-row">
+                <span class="radio radio-on"></span>
+                <span class="voice-n">Ayu</span><span class="voice-g">perempuan</span>
+                <span class="voice-p"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+              </div>
+              <div class="voice-row">
+                <span class="radio"></span>
+                <span class="voice-n">Bima</span><span class="voice-g">laki-laki</span>
+                <span class="voice-p"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:20px;"><span class="btn btn-primary">Masukkan ke rak</span></div>
+          </div>
+        </div></div>
+        <p class="stage-note">Baris <strong style="color:var(--text)">± 18 hari dengar</strong> dibesarkan jadi angka display. Di sinilah user pertama kali paham ini serial harian, bukan file audio raksasa — jadi ia tidak boleh sekadar jadi baris teks biasa.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== ALUR 4 ===================== -->
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Alur 04</span>
+      <h2>Mendengarkan</h2>
+      <p>Permukaan baca turun ke nyaris hitam. Warna ramai hanya muncul di layar momen — recap di awal, garis finis di akhir.</p>
+    </div>
+    <div class="rack">
+
+      <!-- 10 · Recap -->
+      <div class="stage">
+        <div class="stage-cap"><h3>8 · Sebelumnya…</h3><span>Hanya bila jeda &gt;24 jam</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+            <div class="spacer"></div>
+            <h2 class="h-display" style="text-align:center;font-size:27px;color:var(--text-muted);">Sebelumnya…</h2>
+            <p class="recap-body" style="padding-top:24px;">Di bab lalu, penulis memperkenalkan gagasan bahwa sebagian hal ada di bawah kendali kita, sebagian lagi tidak.</p>
+            <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:14px;">
+              <span class="btn btn-primary">Lanjut ke Bab 4</span>
+              <span class="btn-ghost">Lewati</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Teksnya langsung disuarakan begitu layar terbuka — indikator lima batang itu menjelaskan kenapa ada suara tanpa perlu tombol putar.</p>
+      </div>
+
+      <!-- 11 · Player -->
+      <div class="stage">
+        <div class="stage-cap"><h3>9 · Player</h3><span>Layar inti</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="player-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              <span class="player-chap">Bab 4</span>
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+            </div>
+            <h3 class="player-title">Dikotomi Kendali</h3>
+            <div class="reader">
+              <p class="ln-past">Beberapa hal ada dalam kendali kita.</p>
+              <p class="ln-active">Sebagian lagi tidak sama sekali.</p>
+              <p class="ln-future">Kegelisahan lahir ketika kita mencoba mengendalikan yang bukan urusan kita.</p>
+              <p class="ln-future">Yang bisa kita atur hanyalah penilaian dan tindakan sendiri.</p>
+            </div>
+            <div class="scrub">
+              <div class="scrub-track"><span class="scrub-fill"></span><span class="scrub-knob"></span></div>
+              <div class="scrub-times"><span>6:12</span><span>14:03</span></div>
+            </div>
+            <div class="transport">
+              <span class="skip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>15</span>
+              <span class="big-btn"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></span>
+              <span class="skip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>15</span>
+            </div>
+            <div class="player-foot"><span><b>1.0×</b></span><span>Suara <b>Ayu</b></span><span><b>18m</b> tersisa</span></div>
+          </div>
+        </div></div>
+        <p class="stage-note">Area teks mengambil porsi terbesar — inilah yang membedakan Bacain dari pemutar audio biasa. Kalimat aktif ditandai bilah aksen plus latar redup.</p>
+      </div>
+
+      <!-- 12 · Mode fokus -->
+      <div class="stage">
+        <div class="stage-cap"><h3>9b · Mode fokus</h3><span>Ketuk area teks</span></div>
+        <div class="phone-wrap"><div class="phone" style="background:#050605;">
+          <div class="statusbar" style="color:#2E332C;"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="focus">
+              <div style="text-align:center;">
+                <div class="focus-book">Filosofi Teras</div>
+                <div class="focus-chap">Bab 4</div>
+              </div>
+              <p class="focus-ln">Sebagian lagi tidak sama sekali.</p>
+            </div>
+            <div class="focus-transport">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              <span class="fp"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+            </div>
+            <div class="focus-scrub" style="margin-bottom:30px;"><i></i></div>
+          </div>
+        </div></div>
+        <p class="stage-note">Aksen sengaja dicabut sepenuhnya di sini. Untuk dipakai di jalan atau saat mata istirahat, layar harus berhenti menarik perhatian.</p>
+      </div>
+
+      <!-- 13 · Jatah habis -->
+      <div class="stage">
+        <div class="stage-cap"><h3>10 · Jatah habis</h3><span>Garis finis, bukan tembok</span></div>
+        <div class="phone-wrap"><div class="phone phone-light">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="finish">
+            <div class="finish-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+            <div class="orn-art orn-art-ink" style="width:190px;margin-top:4px;"></div>
+            <div class="finish-num">32</div>
+            <div class="finish-unit">menit hari ini</div>
+            <h3 class="finish-head">Jatah hari ini habis. Lumayan!</h3>
+            <p class="finish-body">Bab 5 kami siapkan besok jam 07.00. Sampai ketemu lagi.</p>
+            <div class="finish-actions">
+              <span class="btn btn-ink">Dengar ulang bab lama</span>
+              <span class="finish-ghost">Tutup</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Mendengar ulang bab lama tidak pernah dikunci — MP3-nya sudah ada, tidak ada biaya baru. Tombolnya justru yang paling menonjol.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== ALUR 5 ===================== -->
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Alur 05</span>
+      <h2>Pengaturan &amp; pengingat</h2>
+      <p>Login baru ditawarkan di sini, tidak pernah di awal — dan dibingkai sebagai mengamankan progres, bukan sebagai syarat.</p>
+    </div>
+    <div class="rack">
+
+      <!-- 14 · Pengaturan -->
+      <div class="stage">
+        <div class="stage-cap"><h3>11 · Pengaturan</h3><span>Empat kelompok</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="topbar-title">Pengaturan</span>
+            </div>
+            <div class="settings">
+              <div class="set-group">
+                <span class="label">Kebiasaan</span>
+                <div class="set-row"><span class="set-name">Pengingat harian</span><span class="set-val">07.00</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+                <div class="set-row"><span class="set-name">Notifikasi</span><span class="toggle"></span></div>
+              </div>
+              <div class="set-group">
+                <span class="label">Suara</span>
+                <div class="set-row"><span class="set-name">Suara pembaca</span><span class="set-val">Ayu</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+                <div class="set-row"><span class="set-name">Kecepatan</span><span class="set-val">1.0×</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+              </div>
+              <div class="set-group">
+                <span class="label">Penyimpanan</span>
+                <div class="set-row"><span class="set-name">Unduh otomatis</span><span class="toggle"></span></div>
+                <div class="set-row"><span class="set-name">Kelola unduhan</span><span class="set-val">124 MB</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+              </div>
+              <div class="set-group">
+                <span class="label">Akun</span>
+                <div class="set-row"><span class="set-name">Amankan progres</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+                <p class="set-hint">Masuk dengan Google supaya rak dan progresmu tidak hilang kalau ganti HP.</p>
+              </div>
+              <div class="set-group">
+                <div class="set-row" style="border-top:1px solid var(--line-soft);"><span class="set-name">Tentang Bacain</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Tidak ada satu pun bidang warna di layar ini. Aksen hanya muncul di dua toggle yang menyala — dan itu memang satu-satunya hal yang bisa diubah dengan sekali sentuh.</p>
+      </div>
+
+      <!-- 15 · Notifikasi -->
+      <div class="stage">
+        <div class="stage-cap"><h3>Notifikasi harian</h3><span>Jam 07.00</span></div>
+        <div class="phone-wrap"><div class="phone" style="justify-content:center;">
+          <div class="notif-stage" style="padding:0 16px;">
+            <div class="notif">
+              <span class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+              <span class="notif-b">
+                <span class="notif-app"><span>Bacain</span><span>07.00</span></span>
+                <span class="notif-t">Bab 4 sudah siap</span>
+                <span class="notif-d">Dikotomi Kendali · 14 menit</span>
+              </span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Segmen di-prefetch menjelang jam ini, jadi begitu notifikasi ditekan audio langsung jalan tanpa menunggu sintesis. Judul bab disebut, bukan sekadar "waktunya membaca".</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="orn-rule" style="margin-top:52px;"></div>
+
+  <div class="footnote">
+    <div>
+      <h4>Keputusan yang saya ambil sendiri</h4>
+      <p><strong>Bone menggantikan kuning.</strong> Palet butuh delapan warna karena sampul dipilih dari hash judul. Slot kosong bekas kuning saya isi <code>#F2EFE4</code> — krem yang diambil dari wordmark, jadi penggantinya datang dari identitasmu, bukan dari luar.</p>
+      <p><strong>Olive sedikit dinaikkan</strong> dari <code>#8A8100</code> ke <code>#948B12</code>. Dengan tinta hijau wordmark, nilai lamanya jatuh ke 4,4:1 — di bawah ambang AA. Sekarang 5,0:1.</p>
+      <p><strong>Ornamen diwarnai ulang</strong> ke pistachio, coral, dan krem. Versi pastel dari putaran lalu akan terlihat pucat di sebelah coral dan jingga.</p>
+    </div>
+    <div>
+      <h4>Yang perlu kamu putuskan</h4>
+      <p><strong>Amber dan Olive masih keluarga kuning keemasan.</strong> Saya baca "kurangi kuning" sebagai membuang kuning listrik <code>#EDE300</code> saja. Kalau maksudmu seluruh keluarga kuning, bilang — tinggal ganti dua nilai itu.</p>
+      <p><strong>Mode terang belum ada.</strong> Empat belas layar ini semuanya versi gelap. Setiap layar wajib punya dua versi, dan mode terang bukan pembalikan warna.</p>
+      <p><strong>Huruf display masih pendekatan.</strong> Judul memakai serif kontras-tinggi bawaan sistem. Kalau kamu kirim nama typeface wordmark, saya samakan — lisensinya harus mengizinkan <em>app embedding</em>.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var board = document.getElementById('board');
+  var note  = document.getElementById('accent-note');
+  var btns  = document.querySelectorAll('.swatch-btn');
+  var notes = {
+    coral:     'Coral — kelopak oranye ornamen yang diturunkan sedikit. Hangat, mudah diingat, dan satu-satunya kandidat yang sudah hadir di aset kamu.',
+    lavender:  'Lavender — paling tenang di layar player dan paling tidak terduga untuk kategori ini. Risikonya terasa tertempel, karena ia tidak ada di logo maupun ornamen.',
+    pistachio: 'Pistachio — daun ornamen. Paling menyatu dengan identitas, tapi juga paling mudah tertukar dengan warna sampul karena hijau muncul di mana-mana.'
+  };
+  btns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-set');
+      board.setAttribute('data-accent', key);
+      note.textContent = notes[key];
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+    });
+  });
+})();
+</script>
