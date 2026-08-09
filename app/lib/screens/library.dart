@@ -15,7 +15,7 @@ class LibraryPage extends StatelessWidget {
 
   Future<void> _addFromBytes(
       BuildContext context, List<int> bytes, String filename) async {
-    final book = await state.parseEpub(bytes, filename: filename);
+    final book = await state.parseFile(bytes, filename: filename);
     if (book == null || !context.mounted) return;
     final segments = state.previewSegments(book);
     final stored = await Navigator.of(context).push<StoredBook?>(
@@ -30,7 +30,7 @@ class LibraryPage extends StatelessWidget {
   Future<void> _pickFile(BuildContext context) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['epub'],
+      allowedExtensions: ['epub', 'pdf'],
       withData: true,
     );
     final file = result?.files.firstOrNull;
@@ -153,8 +153,8 @@ void showModalBarrierSheet(
               key: const Key('src-file'),
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.description_outlined, color: ink),
-              title: const Text('Pilih berkas EPUB'),
-              subtitle: const Text('Dari penyimpanan perangkatmu'),
+              title: const Text('Pilih berkas'),
+              subtitle: const Text('EPUB atau PDF berteks'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 page._pickFile(context);

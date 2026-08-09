@@ -202,6 +202,23 @@ sempat didengar utuh.
 
 ---
 
+## 5b. Lisensi yang perlu kamu urus
+
+**`syncfusion_flutter_pdf`** (dipakai untuk impor PDF) bukan lisensi bebas.
+Lisensinya berbunyi: tidak boleh dipakai tanpa Community License **atau**
+lisensi komersial.
+
+Kamu memenuhi syarat Community License — gratis, untuk pendapatan di bawah
+1 juta USD/tahun dan kurang dari 5 pengembang — tapi **harus didaftarkan**,
+tidak otomatis. Daftar di syncfusion.com sebelum app ini dibagikan luas.
+
+Kalau syarat itu mengganjal, penggantinya `pdfrx` (berbasis pdfium, lisensi
+permisif). Konsekuensinya: bukan Dart murni, jadi impor PDF tidak lagi bisa
+diuji tanpa perangkat — 8 uji PDF sekarang jalan justru karena Syncfusion
+murni Dart.
+
+---
+
 ## 6. Jebakan lingkungan — akan menggigit lagi
 
 1. **Flutter ada di `/opt/flutter/bin`**, tidak di PATH bawaan. Selalu

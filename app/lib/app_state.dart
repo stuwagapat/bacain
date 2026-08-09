@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 
 import 'core/epub/epub_reader.dart';
 import 'core/model/book.dart';
+import 'core/pdf/pdf_reader.dart';
 import 'core/store/library_store.dart';
 import 'core/store/settings_store.dart';
 import 'core/text/segmenter.dart';
@@ -24,6 +25,7 @@ class AppState extends ChangeNotifier {
   final SettingsStore settingsStore;
   final SegmentPlayer player;
   final EpubReader reader;
+  final PdfReader pdfReader;
   final Segmenter segmenter;
   final DateTime Function() clock;
 
@@ -32,6 +34,7 @@ class AppState extends ChangeNotifier {
     required this.settingsStore,
     required this.player,
     this.reader = const EpubReader(),
+    this.pdfReader = const PdfReader(),
     this.segmenter = const Segmenter(),
     DateTime Function()? clock,
   }) : clock = clock ?? DateTime.now {
@@ -147,13 +150,31 @@ class AppState extends ChangeNotifier {
 
   // ── rak buku ─────────────────────────────────────────────────────
 
-  Future<Book?> parseEpub(List<int> bytes, {required String filename}) async {
+  /// Berkas dikenali dari TANDA TANGAN ISINYA, bukan dari ekstensi nama.
+  /// Orang sering menyimpan PDF dengan nama .epub atau sebaliknya, dan
+  /// ekstensi yang salah tidak boleh berujung "berkas rusak".
+  static bool looksLikePdf(List<int> b) =>
+      b.length > 4 &&
+      b[0] == 0x25 && // %
+      b[1] == 0x50 && // P
+      b[2] == 0x44 && // D
+      b[3] == 0x46; //  F
+
+  Future<Book?> parseFile(List<int> bytes, {required String filename}) async {
     _busy = true;
     _error = null;
     notifyListeners();
     try {
-      return reader.read(bytes, id: '${clock().millisecondsSinceEpoch}');
+      final id = '${clock().millisecondsSinceEpoch}';
+      final isPdf = looksLikePdf(bytes) ||
+          (bytes.length <= 4 && filename.toLowerCase().endsWith('.pdf'));
+      return isPdf
+          ? pdfReader.read(bytes, id: id, filename: filename)
+          : reader.read(bytes, id: id);
     } on EpubException catch (e) {
+      _error = e.message;
+      return null;
+    } on PdfException catch (e) {
       _error = e.message;
       return null;
     } catch (e) {
@@ -164,6 +185,9 @@ class AppState extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<Book?> parseEpub(List<int> bytes, {required String filename}) =>
+      parseFile(bytes, filename: filename);
 
   List<Segment> previewSegments(Book book) => segmenter.segment(book);
 
