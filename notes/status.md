@@ -47,7 +47,7 @@ buku → daftar bagian → recap → pemutar → mode fokus → jatah habis → 
 | Mode fokus | jalan |
 | Pengaturan | jalan |
 | Impor PDF berlapis teks | jalan, teruji |
-| Build APK lewat GitHub Actions | jalan |
+| Build APK lewat GitHub Actions | jalan — APK ±41 MB |
 | Mesin bicara Android (flutter_tts) | kode selesai, **belum dicoba di HP** |
 | Pengingat harian | kode selesai, **belum dicoba di HP** |
 | Pemutaran saat layar mati | kode selesai, **belum dicoba di HP** |
@@ -286,7 +286,11 @@ murni Dart.
 10. **`flutter_local_notifications` menuntut core library desugaring.** Tanpa
     itu build berhenti di `checkReleaseAarMetadata`. Pesannya jelas menyebut
     nama paketnya, tapi hanya muncul setelah ±4 menit kompilasi.
-11. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
+11. **R8 menolak build karena paket OCR merujuk varian aksara yang tidak
+    dipasang** (Tionghoa, Devanagari, Jepang, Korea). Didiamkan lewat
+    `-dontwarn` di `android/app/proguard-rules.pro`. Kalau nanti butuh aksara
+    lain, tambahkan paketnya dan hapus baris yang bersangkutan.
+12. **Proyek ini sengaja memakai AGP 8, bukan AGP 9 bawaan template Flutter.**
     Di AGP 9 dua paket punya asumsi yang saling bertentangan dan tidak ada
     nilai `android.builtInKotlin` yang memuaskan keduanya:
     `false` membuat `file_picker` tidak mengompilasi Kotlin-nya sama sekali
