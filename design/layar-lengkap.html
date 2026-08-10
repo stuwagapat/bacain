@@ -295,6 +295,38 @@ body {
 
 .cam-done { font-size: 13.5px; font-weight: 700; color: var(--c-bone); background: rgba(9,11,8,.62); padding: 10px 15px; border-radius: var(--r-pill); width: 72px; text-align: center; flex: none; font-variant-numeric: tabular-nums; }
 
+/* rekonstruksi tampilan bawaan ML Kit Document Scanner — bukan desain kita.
+   Sengaja memakai bahasa Material: Roboto, biru Google, radius kecil, ikon sistem. */
+.mlk { flex: 1; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column;
+       font-family: Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif; }
+.mlk-view { position: absolute; inset: 0; background: radial-gradient(115% 78% at 50% 42%, #2B2D2B 0%, #191A19 58%, #0E0F0E 100%); }
+.mlk-page {
+  position: absolute; left: 50%; top: 44%; width: 232px; height: 306px;
+  transform: translate(-50%, -50%) perspective(720px) rotateX(6deg) rotateZ(-1deg);
+  background: #C8C5BC; border-radius: 2px; padding: 24px 20px; display: flex; flex-direction: column; gap: 8px;
+}
+.mlk-page .cam-line { background: #96938A; }
+.mlk-quad {
+  position: absolute; left: 50%; top: 44%; width: 248px; height: 324px;
+  transform: translate(-50%, -50%) perspective(720px) rotateX(6deg) rotateZ(-1deg);
+  border: 2px solid #FFFFFF;
+}
+.mlk-h { position: absolute; width: 12px; height: 12px; border-radius: var(--r-pill); background: #FFFFFF; }
+.mlk-h-tl { top: -7px; left: -7px; } .mlk-h-tr { top: -7px; right: -7px; }
+.mlk-h-bl { bottom: -7px; left: -7px; } .mlk-h-br { bottom: -7px; right: -7px; }
+
+.mlk-top { position: relative; z-index: 2; display: flex; align-items: center; gap: 24px; padding: 16px; color: #FFFFFF; flex: none; }
+.mlk-top svg { width: 22px; height: 22px; display: block; flex: none; }
+.mlk-title { flex: 1; font-size: 17px; font-weight: 500; }
+.mlk-hint { position: relative; z-index: 2; margin: auto auto 0; background: rgba(32,33,36,.88); color: #FFFFFF; font-size: 13px; padding: 9px 16px; border-radius: 4px; flex: none; }
+.mlk-bottom { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 24px 26px 30px; flex: none; }
+.mlk-chip { display: flex; align-items: center; gap: 6px; background: #1A73E8; color: #FFFFFF; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 8px; }
+.mlk-chip svg { width: 14px; height: 14px; display: block; }
+.mlk-shutter { width: 62px; height: 62px; border-radius: var(--r-pill); background: #FFFFFF; border: 4px solid rgba(255,255,255,.38); flex: none; }
+.mlk-count { width: 44px; height: 44px; border-radius: 4px; background: #C8C5BC; border: 2px solid #FFFFFF; display: grid; place-items: center; font-size: 14px; font-weight: 500; color: #202124; flex: none; }
+
+.recon { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--c-amber); background: rgba(242,196,56,.13); border-radius: var(--r-pill); padding: 4px 10px; }
+
 /* nampan halaman terkumpul */
 .tray-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; flex: none; }
 .tray-item { position: relative; aspect-ratio: 3 / 4; border-radius: 9px; background: #CFCBC0; padding: 9px 8px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
@@ -644,11 +676,11 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             <div class="stack" style="padding-bottom:24px;">
               <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto buku fisik</span>
               <span class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>Ambil file PDF atau EPUB</span>
-              <p class="handoff">Memotret pakai kamera Bacain sendiri.<br>Hanya "ambil file" yang membuka file manager HP.</p>
+              <p class="handoff">Ambil file membuka file manager bawaan HP.</p>
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa". Baris di bawahnya kini hanya menyiapkan satu perpindahan yang tersisa: file manager.</p>
+        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa". Baris di bawahnya menyiapkan satu-satunya perpindahan yang langsung terjadi: file manager. Jalur kamera tidak butuh peringatan di sini karena layar 4b sudah menanganinya.</p>
       </div>
 
       <!-- 5 · Beranda terisi -->
@@ -782,7 +814,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
     <div class="flow-head">
       <span class="flow-n">Alur 03</span>
       <h2>Menambah buku</h2>
-      <p>Kamera sekarang didesain sendiri, tidak lagi memakai tampilan bawaan ML Kit — ongkosnya dijabarkan di kaki papan. Hanya file picker yang masih milik Android.</p>
+      <p>Jalan tengah: scanner bawaan ML Kit tetap dipakai untuk memotret, tapi diapit dua layar milik kita — penyiap di depan, nampan di belakang. Bagian yang terasa asing menyusut jadi detik-detik membidik saja.</p>
     </div>
     <div class="rack">
 
@@ -821,7 +853,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
               <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
               <span><p class="opt-t">Cerita rakyat</p><p class="opt-d">Gratis · menyusul</p></span>
             </div>
-            <p class="handoff">Hanya "ambil dari file" yang membuka file manager HP.</p>
+            <p class="handoff">Ambil dari file membuka file manager bawaan HP.</p>
           </div>
         </div></div>
         <p class="stage-note">Beranda meredup di belakang, tidak hilang — user tetap tahu ia sedang di atas rak, bukan pindah layar.</p>
@@ -858,83 +890,45 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Inilah pengganti sebenarnya dari baris microcopy kemarin: layar penyiap yang punya bahasa visual Bacain, bukan peringatan bahwa user akan dilempar keluar.</p>
+        <p class="stage-note">Layar ini memikul beban terberat dari jalan tengah. Karena kamera sistem tidak bisa memberi panduan, semua yang perlu diketahui user harus disampaikan di sini — termasuk bahwa potretnya otomatis, supaya shutter tidak ditekan berkali-kali.</p>
       </div>
 
-      <!-- 4c · Kamera membidik -->
+      <!-- 4c · Kamera sistem (ML Kit) -->
       <div class="stage">
-        <div class="stage-cap"><h3>4c · Kamera — halaman terbaca</h3><span>Potret otomatis</span></div>
+        <div class="stage-cap"><h3>4c · Kamera sistem</h3><span>Bawaan ML Kit</span></div>
         <div class="phone-wrap"><div class="phone">
-          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
-          <div class="cam">
-            <div class="cam-view"></div>
-            <div class="cam-page">
+          <div class="statusbar" style="color:rgba(255,255,255,.5)"><span>09.41</span><span>&#9650; &#9646;</span></div>
+          <div class="mlk">
+            <div class="mlk-view"></div>
+            <div class="mlk-page">
               <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
               <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
               <span class="cam-line" style="width:64%"></span>
               <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line" style="width:44%"></span>
             </div>
-            <div class="cam-quad">
-              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
-              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
+            <div class="mlk-quad">
+              <span class="mlk-h mlk-h-tl"></span><span class="mlk-h mlk-h-tr"></span>
+              <span class="mlk-h mlk-h-bl"></span><span class="mlk-h mlk-h-br"></span>
             </div>
-            <div class="cam-top">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <span class="cam-count">3 halaman</span>
+            <div class="mlk-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="mlk-title">Pindai dokumen</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
             </div>
-            <div class="cam-chip">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
-              Halaman terbaca — tahan sebentar
-            </div>
-            <div class="cam-bottom">
-              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
-              <span class="cam-shutter"><i></i></span>
-              <span class="cam-done">Selesai</span>
+            <div class="mlk-hint">Posisikan dokumen dalam bingkai</div>
+            <div class="mlk-bottom">
+              <span class="mlk-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v4M12 18v4M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M2 12h4M18 12h4"/></svg>Otomatis</span>
+              <span class="mlk-shutter"></span>
+              <span class="mlk-count">3</span>
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Bingkai menyala aksen begitu keempat sudut terbaca. Tumpukan kiri menunjukkan halaman yang sudah masuk — bukti visual bahwa jepretan tadi tidak hilang.</p>
+        <p class="stage-note"><span class="recon">Rekonstruksi</span> Bukan tangkapan layar asli, tapi bahasa visualnya akurat: Roboto, biru Google, radius 4&#8211;8px, ikon Material. Layar ini <strong style="color:var(--text)">tidak bisa di-tema</strong> — itulah harga dari deteksi tepi dan koreksi perspektif yang didapat gratis.</p>
       </div>
 
-      <!-- 4d · Kamera perlu dibetulkan -->
+      <!-- 4d · Halaman terkumpul -->
       <div class="stage">
-        <div class="stage-cap"><h3>4d · Kamera — perlu dibetulkan</h3><span>Kondisi buruk</span></div>
-        <div class="phone-wrap"><div class="phone">
-          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
-          <div class="cam">
-            <div class="cam-view cam-view-dim"></div>
-            <div class="cam-page cam-page-dim cam-page-skew">
-              <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
-              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
-              <span class="cam-line" style="width:64%"></span>
-            </div>
-            <div class="cam-quad cam-quad-skew">
-              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
-              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
-            </div>
-            <div class="cam-top">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <span class="cam-count">3 halaman</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
-            </div>
-            <div class="cam-chip cam-chip-warn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-              Kurang cahaya dan agak miring
-            </div>
-            <div class="cam-bottom">
-              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
-              <span class="cam-shutter cam-shutter-warn"><i></i></span>
-              <span class="cam-done">Selesai</span>
-            </div>
-          </div>
-        </div></div>
-        <p class="stage-note">Potret otomatis berhenti, tapi tombolnya <strong style="color:var(--text)">tidak pernah dikunci</strong> — user tetap boleh memaksa. App yang menolak memotret lebih menyebalkan daripada hasil scan yang agak miring.</p>
-      </div>
-
-      <!-- 4e · Halaman terkumpul -->
-      <div class="stage">
-        <div class="stage-cap"><h3>4e · Halaman terkumpul</h3><span>Sebelum diproses</span></div>
+        <div class="stage-cap"><h3>4d · Halaman terkumpul</h3><span>Sebelum diproses</span></div>
         <div class="phone-wrap"><div class="phone">
           <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
           <div class="screen">
@@ -966,7 +960,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Halaman buram ditandai sebelum OCR jalan, bukan sesudah. Memfoto ulang sekarang jauh lebih murah daripada membetulkan teks kacau di layar berikutnya.</p>
+        <p class="stage-note">Layar pertama setelah kembali dari kamera sistem — dan yang memulihkan rasa "aku masih di dalam Bacain". Halaman buram ditandai di sini, sebelum OCR jalan, saat memfoto ulang masih murah.</p>
       </div>
 
       <!-- 8 · Tinjau scan -->
@@ -1257,6 +1251,88 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
     </div>
   </section>
 
+  <section class="flow">
+    <div class="flow-head">
+      <span class="flow-n">Arsip</span>
+      <h2>Kamera sendiri — tidak dibangun di MVP</h2>
+      <p>Dirancang penuh, lalu dipensiunkan sadar: ongkosnya 1&#8211;2 minggu dan risiko crop lebih buruk di HP kelas bawah. Disimpan sebagai spesifikasi kalau nanti dipindah setelah validasi.</p>
+    </div>
+    <div class="rack">
+
+      <!-- 4c · Kamera membidik -->
+      <div class="stage">
+        <div class="stage-cap"><h3>A1 · Kamera sendiri — terbaca</h3><span>Potret otomatis</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="cam">
+            <div class="cam-view"></div>
+            <div class="cam-page">
+              <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
+              <span class="cam-line" style="width:64%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line" style="width:44%"></span>
+            </div>
+            <div class="cam-quad">
+              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
+              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
+            </div>
+            <div class="cam-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span class="cam-count">3 halaman</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+            </div>
+            <div class="cam-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+              Halaman terbaca — tahan sebentar
+            </div>
+            <div class="cam-bottom">
+              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
+              <span class="cam-shutter"><i></i></span>
+              <span class="cam-done">Selesai</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Bingkai menyala aksen begitu keempat sudut terbaca. Tumpukan kiri menunjukkan halaman yang sudah masuk — bukti visual bahwa jepretan tadi tidak hilang.</p>
+      </div>
+
+      <!-- 4d · Kamera perlu dibetulkan -->
+      <div class="stage">
+        <div class="stage-cap"><h3>A2 · Kamera sendiri — dibetulkan</h3><span>Kondisi buruk</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="cam">
+            <div class="cam-view cam-view-dim"></div>
+            <div class="cam-page cam-page-dim cam-page-skew">
+              <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
+              <span class="cam-line" style="width:64%"></span>
+            </div>
+            <div class="cam-quad cam-quad-skew">
+              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
+              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
+            </div>
+            <div class="cam-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span class="cam-count">3 halaman</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+            </div>
+            <div class="cam-chip cam-chip-warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              Kurang cahaya dan agak miring
+            </div>
+            <div class="cam-bottom">
+              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
+              <span class="cam-shutter cam-shutter-warn"><i></i></span>
+              <span class="cam-done">Selesai</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Potret otomatis berhenti, tapi tombolnya <strong style="color:var(--text)">tidak pernah dikunci</strong> — user tetap boleh memaksa. App yang menolak memotret lebih menyebalkan daripada hasil scan yang agak miring.</p>
+      </div>
+
+    </div>
+  </section>
+
   <div class="orn-rule" style="margin-top:52px;"></div>
 
   <div class="footnote">
@@ -1269,7 +1345,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
     </div>
     <div>
       <h4>Yang perlu kamu putuskan</h4>
-      <p><strong>Kamera sendiri menggantikan ML Kit Document Scanner.</strong> Empat layar kamera di atas hanya bisa dibangun kalau scanner bawaan dilepas. Yang ikut hilang dan harus ditulis ulang di atas CameraX: deteksi tepi realtime, koreksi perspektif, dan pengelolaan batch. Perkiraan tambahan 1–2 minggu kerja, plus risiko kualitas crop yang lebih rendah dari milik Google di HP kelas bawah. Yang didapat: alur scan tidak lagi terasa keluar dari app, dan kondisi buruk bisa dipandu dengan bahasa sendiri. Kalau ongkosnya terlalu besar untuk fase validasi, layar <strong>4b</strong> dan <strong>4e</strong> tetap bisa dipakai mengapit scanner bawaan — itu menyerap sebagian besar kebingungannya dengan kerja jauh lebih sedikit.</p>
+      <p><strong>Jalan tengah sudah dipilih.</strong> Scanner bawaan ML Kit tetap dipakai; layar 4b dan 4d mengapitnya. Yang tidak bisa diperbaiki dengan cara ini: kondisi buruk (kurang cahaya, halaman miring) tidak bisa dipandu dengan bahasa kita, karena panduannya milik Google. Kalau data penguji nanti menunjukkan banyak scan gagal, itu sinyal untuk memindahkannya — desainnya sudah siap di bagian Arsip.</p>
       <p><strong>"Bab 4 sudah menunggu."</strong> Notifikasi harian membalik logika tsundoku: dulu tumpukan buku menunggu sambil menuduh, sekarang satu bab menunggu sambil mengajak. Kalau mau yang lebih datar: "Bab 4 sudah siap."</p>
       <p><strong>Amber dan Olive masih keluarga kuning keemasan.</strong> Saya baca "kurangi kuning" sebagai membuang kuning listrik <code>#EDE300</code> saja. Kalau maksudmu seluruh keluarga kuning, bilang — tinggal ganti dua nilai itu.</p>
       <p><strong>Mode terang belum ada.</strong> Empat belas layar ini semuanya versi gelap, dan mode terang bukan sekadar pembalikan warna.</p>
