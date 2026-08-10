@@ -23,6 +23,61 @@ class PdfException implements Exception {
   String toString() => 'PdfException: $message';
 }
 
+/// Ringkasan isi sebuah PDF, dilihat per halaman.
+///
+/// Dipakai supaya user bisa memilih, bukan cuma diberi tahu "tidak bisa".
+/// Sebuah buku hasil pindaian sering bercampur: daftar isi dan kata pengantar
+/// berupa teks, badannya berupa gambar — atau sebaliknya. Menolak seluruh
+/// berkas karena rata-ratanya rendah membuang bagian yang sebenarnya terbaca.
+class PdfInspection {
+  /// Jumlah huruf yang terbaca di tiap halaman, urut dari halaman pertama.
+  final List<int> charsPerPage;
+
+  const PdfInspection(this.charsPerPage);
+
+  int get pageCount => charsPerPage.length;
+
+  /// Halaman yang punya teks sungguhan (nomor halaman mulai dari 1).
+  List<int> get textPages => [
+        for (var i = 0; i < charsPerPage.length; i++)
+          if (charsPerPage[i] >= PdfReader.minCharsPerPage) i + 1
+      ];
+
+  /// Halaman yang nyaris tanpa teks — hampir selalu gambar hasil pindaian.
+  List<int> get imagePages => [
+        for (var i = 0; i < charsPerPage.length; i++)
+          if (charsPerPage[i] < PdfReader.minCharsPerPage) i + 1
+      ];
+
+  bool get hasAnyText => textPages.isNotEmpty;
+  bool get fullyScanned => textPages.isEmpty && pageCount > 0;
+  bool get mixed => textPages.isNotEmpty && imagePages.isNotEmpty;
+
+  /// Rentang halaman berteks yang paling panjang dan tak terputus. Ini
+  /// tebakan awal yang paling masuk akal untuk "badan bukunya di mana":
+  /// halaman gambar biasanya menumpuk di depan (sampul, halaman hak cipta)
+  /// atau di belakang (indeks), bukan berselang-seling di tengah.
+  (int, int)? get longestTextRun {
+    int? mulaiTerbaik, panjangTerbaik, mulai;
+    for (var i = 0; i <= charsPerPage.length; i++) {
+      final berteks =
+          i < charsPerPage.length && charsPerPage[i] >= PdfReader.minCharsPerPage;
+      if (berteks) {
+        mulai ??= i;
+      } else if (mulai != null) {
+        final panjang = i - mulai;
+        if (panjangTerbaik == null || panjang > panjangTerbaik) {
+          panjangTerbaik = panjang;
+          mulaiTerbaik = mulai;
+        }
+        mulai = null;
+      }
+    }
+    if (mulaiTerbaik == null) return null;
+    return (mulaiTerbaik + 1, mulaiTerbaik + panjangTerbaik!);
+  }
+}
+
 class PdfReader {
   const PdfReader({
     this.normalizer = const Normalizer(),
@@ -34,23 +89,53 @@ class PdfReader {
 
   /// Di bawah ini sebuah halaman dianggap tidak punya teks sungguhan —
   /// biasanya cuma sisa nomor halaman dari lapisan teks yang nyaris kosong.
-  static const _minCharsPerPage = 100;
+  static const minCharsPerPage = 100;
 
-  Book read(List<int> bytes, {required String id, String? filename}) {
-    PdfDocument doc;
+  /// Melihat isi PDF tanpa menyusunnya jadi buku. Dipakai layar pemilih
+  /// halaman supaya user tahu apa yang ada di dalam berkasnya sebelum
+  /// memutuskan.
+  PdfInspection inspect(List<int> bytes) {
+    final doc = _open(bytes);
     try {
-      doc = PdfDocument(inputBytes: bytes);
-    } catch (e) {
-      throw PdfException(
-          'Berkas PDF ini tidak bisa dibuka. Mungkin rusak atau terkunci '
-          'kata sandi.');
+      return PdfInspection(
+          [for (final t in _extractPages(doc)) t.trim().length]);
+    } finally {
+      doc.dispose();
     }
+  }
+
+  /// [fromPage] dan [toPage] dihitung mulai 1 dan inklusif. Kosongkan untuk
+  /// mengambil seluruh berkas.
+  Book read(
+    List<int> bytes, {
+    required String id,
+    String? filename,
+    int? fromPage,
+    int? toPage,
+  }) {
+    final doc = _open(bytes);
 
     try {
-      final pages = _extractPages(doc);
+      var pages = _extractPages(doc);
+
+      if (fromPage != null || toPage != null) {
+        final a = ((fromPage ?? 1) - 1).clamp(0, pages.length);
+        final b = (toPage ?? pages.length).clamp(a, pages.length);
+        pages = pages.sublist(a, b);
+        if (pages.isEmpty) {
+          throw PdfException('Rentang halaman itu kosong.');
+        }
+      }
+
       _rejectIfScanned(pages);
 
-      final found = _fromBookmarks(doc, pages) ?? chapters.fromPages(pages);
+      // Penanda bab menunjuk ke nomor halaman di dokumen ASLI, jadi ia cuma
+      // dipakai saat seluruh berkas diambil. Untuk sepotong rentang, babnya
+      // dicari dari pola judul — kalau tidak, potongannya akan dipetakan ke
+      // bab yang salah tanpa ada yang menyadari.
+      final ambilSemua = fromPage == null && toPage == null;
+      final found = (ambilSemua ? _fromBookmarks(doc, pages) : null) ??
+          chapters.fromPages(pages);
       if (found.isEmpty) {
         throw PdfException('PDF ini terbaca kosong.');
       }
@@ -63,6 +148,16 @@ class PdfReader {
       );
     } finally {
       doc.dispose();
+    }
+  }
+
+  PdfDocument _open(List<int> bytes) {
+    try {
+      return PdfDocument(inputBytes: bytes);
+    } catch (_) {
+      throw PdfException(
+          'Berkas PDF ini tidak bisa dibuka. Mungkin rusak atau terkunci '
+          'kata sandi.');
     }
   }
 
@@ -80,15 +175,20 @@ class PdfReader {
     return out;
   }
 
-  /// PDF hasil pindaian punya halaman tapi nyaris tanpa teks. Menerimanya
-  /// diam-diam akan menghasilkan "buku" kosong yang membingungkan.
+  /// Ditolak HANYA kalau tidak ada satu halaman pun yang berteks.
+  ///
+  /// Dulu ambangnya rata-rata seluruh dokumen, jadi buku yang badannya
+  /// terbaca tapi punya banyak halaman gambar — sampul, indeks, lampiran —
+  /// ikut ditolak bulat-bulat. Yang benar: ambil yang bisa diambil, dan biar
+  /// user yang memutuskan sisanya.
   void _rejectIfScanned(List<String> pages) {
     if (pages.isEmpty) throw PdfException('PDF ini tidak punya halaman.');
-    final total = pages.fold<int>(0, (a, p) => a + p.trim().length);
-    if (total ~/ pages.length < _minCharsPerPage) {
+    final berteks =
+        pages.where((p) => p.trim().length >= minCharsPerPage).length;
+    if (berteks == 0) {
       throw PdfException(
-          'PDF ini sepertinya hasil pindaian — halamannya berupa gambar, '
-          'bukan teks. Coba foto bukunya lewat menu "Foto buku fisik".');
+          'Tidak ada satu halaman pun yang berisi teks — halamannya berupa '
+          'gambar. Coba foto bukunya lewat "Foto buku fisik".');
     }
   }
 

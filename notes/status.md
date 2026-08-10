@@ -579,3 +579,34 @@ Ambang 520 dp dipilih di atas HP Android terlebar (±480 dp lebar logis).
 `test/bingkai_test.dart` menjaga itu: kalau ambangnya salah geser, APK di HP
 besar ikut terbingkai 390 dp di tengah layar — kerusakan yang tidak akan
 pernah terlihat dari sesi pengembangan di laptop.
+
+
+## Impor PDF: memilih, bukan ditolak
+
+Dulu PDF ditolak bulat-bulat kalau **rata-rata seluruh dokumen** di bawah 100
+huruf per halaman. Akibatnya buku yang badannya terbaca ikut terbuang gara-gara
+sampul, halaman hak cipta, dan indeks yang berupa gambar.
+
+Sekarang:
+
+- `PdfReader.inspect()` melaporkan jumlah huruf **per halaman**.
+- Ditolak HANYA kalau tidak ada satu halaman pun yang berteks.
+- `read()` menerima `fromPage`/`toPage`. Penanda bab bawaan PDF cuma dipakai
+  saat seluruh berkas diambil — untuk sepotong rentang, babnya dicari dari pola
+  judul, karena penanda menunjuk ke nomor halaman dokumen asli dan akan
+  memetakan potongannya ke bab yang salah.
+- Layar `pdf_pilih_halaman.dart` muncul **hanya kalau ada yang perlu
+  diputuskan** (sebagian halaman berupa gambar). PDF yang seluruhnya berteks
+  masuk langsung tanpa layar tambahan.
+- Rentang awalnya ditebak dari bentangan halaman berteks terpanjang — biasanya
+  itu badan bukunya.
+- Pita di layar itu memperlihatkan SEBARAN halaman gambar. Angka saja tidak
+  cukup: "32 halaman gambar" bisa berarti sampul depan, bisa juga berselang-
+  seling sepanjang buku, dan bentuknya yang menentukan rentang mana yang masuk
+  akal.
+
+**Yang masih belum ada:** OCR untuk PDF yang seluruhnya gambar. Itu butuh
+perender halaman PDF jadi gambar (pdfium lewat `pdfrx` atau sejenisnya) lalu
+ML Kit — jalur Android saja, menambah ukuran APK, dan tidak bisa diuji dari
+lingkungan ini sama sekali. Sementara itu layarnya mengarahkan ke "Foto buku
+fisik", yang memang mengerjakan hal yang sama lewat kamera.

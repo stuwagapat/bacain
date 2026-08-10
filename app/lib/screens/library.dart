@@ -8,6 +8,7 @@ import '../core/store/library_store.dart';
 import '../ui/tokens.dart';
 import 'confirm_book.dart';
 import 'mini_player.dart';
+import 'pdf_pilih_halaman.dart';
 import 'review_scan.dart';
 import 'scan_intro.dart';
 import 'scan_tray.dart';
@@ -20,7 +21,33 @@ class LibraryPage extends StatelessWidget {
 
   Future<void> _addFromBytes(
       BuildContext context, List<int> bytes, String filename) async {
-    final book = await state.parseFile(bytes, filename: filename);
+    int? dari, sampai;
+
+    // PDF diperiksa dulu, dan user diberi tahu apa yang ada di dalamnya —
+    // bukan langsung ditolak kalau sebagian halamannya berupa gambar. Layar
+    // pemilih cuma muncul kalau memang ada yang perlu dipilih.
+    // Muncul HANYA kalau ada yang perlu diputuskan, yaitu saat sebagian
+    // halamannya berupa gambar. PDF yang seluruhnya berteks masuk langsung —
+    // menyodorkan layar pilihan untuk berkas yang tidak bermasalah cuma
+    // menambah satu ketukan tanpa memberi informasi apa pun.
+    final isi = state.inspectPdf(bytes);
+    if (isi != null && (isi.mixed || isi.fullyScanned)) {
+      final pilihan = await Navigator.of(context).push<(int, int)>(
+        MaterialPageRoute(
+          builder: (_) => PilihHalamanPdf(hasil: isi, namaBerkas: filename),
+        ),
+      );
+      if (pilihan == null || !context.mounted) return;
+      // Seluruh berkas terpilih: biarkan tanpa rentang supaya penanda bab
+      // bawaan PDF tetap dipakai.
+      if (pilihan.$1 != 1 || pilihan.$2 != isi.pageCount) {
+        dari = pilihan.$1;
+        sampai = pilihan.$2;
+      }
+    }
+
+    final book = await state.parseFile(bytes,
+        filename: filename, fromPage: dari, toPage: sampai);
     if (book == null || !context.mounted) return;
     final segments = state.previewSegments(book);
     final stored = await Navigator.of(context).push<StoredBook?>(

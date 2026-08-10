@@ -355,7 +355,27 @@ class AppState extends ChangeNotifier {
       b[2] == 0x44 && // D
       b[3] == 0x46; //  F
 
-  Future<Book?> parseFile(List<int> bytes, {required String filename}) async {
+  /// Melihat isi PDF tanpa menyusunnya jadi buku. Mengembalikan null kalau
+  /// berkasnya bukan PDF atau tidak bisa dibuka sama sekali.
+  PdfInspection? inspectPdf(List<int> bytes) {
+    if (!looksLikePdf(bytes)) return null;
+    try {
+      return pdfReader.inspect(bytes);
+    } on PdfException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Book?> parseFile(
+    List<int> bytes, {
+    required String filename,
+    int? fromPage,
+    int? toPage,
+  }) async {
     _busy = true;
     _error = null;
     notifyListeners();
@@ -364,7 +384,8 @@ class AppState extends ChangeNotifier {
       final isPdf = looksLikePdf(bytes) ||
           (bytes.length <= 4 && filename.toLowerCase().endsWith('.pdf'));
       return isPdf
-          ? pdfReader.read(bytes, id: id, filename: filename)
+          ? pdfReader.read(bytes,
+              id: id, filename: filename, fromPage: fromPage, toPage: toPage)
           : reader.read(bytes, id: id);
     } on EpubException catch (e) {
       _error = e.message;
