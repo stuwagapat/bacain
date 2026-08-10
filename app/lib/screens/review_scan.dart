@@ -65,14 +65,14 @@ class _ReviewScanPageState extends State<ReviewScanPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Periksa hasil foto',
-            style: TextStyle(fontSize: 15)),
+        title: const Text('Periksa hasil foto', style: AppType.uiTitleSmall),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
               child: Text('${_index + 1} dari ${_pages.length}',
-                  style: const TextStyle(fontSize: 12.5, color: ink2)),
+                  style: AppType.uiCaption
+                      .copyWith(color: warna.textSecondary)),
             ),
           ),
         ],
@@ -111,7 +111,7 @@ class _ReviewScanPageState extends State<ReviewScanPage> {
             onChanged: (v) => _pages[_index] = page.copyWith(text: v),
             maxLines: null,
             minLines: 6,
-            style: const TextStyle(fontSize: 15, height: 1.55),
+            style: AppType.uiBody.copyWith(color: warna.textPrimary),
             decoration: const InputDecoration(
               labelText: 'Teks yang terbaca',
               alignLabelWithHint: true,
@@ -120,11 +120,14 @@ class _ReviewScanPageState extends State<ReviewScanPage> {
           ),
 
           if (page.text.trim().isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 10),
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
               child: Text(
                 'Halaman ini tidak terbaca. Ketik sendiri, atau buang saja.',
-                style: TextStyle(fontSize: 12.5, color: orange),
+                // Bersama penandaan kata yang diragukan OCR (belum ada), ini
+                // satu-satunya tempat di seluruh app warna dipakai untuk
+                // memberi arti — di mana pun selain di sini, warna cuma rupa.
+                style: AppType.uiCaption.copyWith(color: warna.statusWarning),
               ),
             ),
 
@@ -143,7 +146,8 @@ class _ReviewScanPageState extends State<ReviewScanPage> {
                 onPressed: _pages.length > 1 ? _hapus : null,
                 icon: const Icon(Icons.delete_outline, size: 18),
                 label: const Text('Buang halaman ini'),
-                style: TextButton.styleFrom(foregroundColor: orange),
+                style:
+                    TextButton.styleFrom(foregroundColor: warna.brandPrimary),
               ),
               const Spacer(),
               IconButton(

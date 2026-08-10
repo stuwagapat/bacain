@@ -67,23 +67,29 @@ class _BacainAppState extends State<BacainApp> {
     return MaterialApp(
       title: 'Bacain',
       debugShowCheckedModeBanner: false,
+      // Gelap adalah keadaan awal, bukan pilihan. App ini didengarkan malam
+      // hari dan menjelang tidur; layar terang di kamar gelap adalah yang
+      // paling cepat membuat orang berhenti.
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Jakarta',
-        scaffoldBackgroundColor: paper,
+        brightness: Brightness.dark,
+        fontFamily: AppType.uiFamily,
+        scaffoldBackgroundColor: warna.bgBase,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: green,
-          primary: green,
-          surface: paper,
-          brightness: Brightness.light,
+          seedColor: warna.brandPrimary,
+          primary: warna.brandPrimary,
+          onPrimary: warna.brandOnPrimary,
+          surface: warna.bgSurface,
+          onSurface: warna.textPrimary,
+          brightness: Brightness.dark,
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: paper,
-          foregroundColor: ink,
+        appBarTheme: AppBarTheme(
+          backgroundColor: warna.bgBase,
+          foregroundColor: warna.textPrimary,
           elevation: 0,
           centerTitle: false,
         ),
-        dividerColor: rule,
+        dividerColor: warna.borderDefault,
       ),
       home: AnimatedBuilder(
         animation: widget.state,

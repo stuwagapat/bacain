@@ -119,11 +119,12 @@ class LibraryPage extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: orange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      color: warna.statusErrorBg,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Text(state.error!,
-                        style: const TextStyle(color: Color(0xFF8A3A1C))),
+                        style: AppType.uiBody
+                            .copyWith(color: warna.statusError)),
                   ),
                 if (books.isEmpty) ...[
                   const SizedBox(height: 26),
@@ -155,9 +156,9 @@ void showModalBarrierSheet(
     BuildContext context, AppState state, LibraryPage page) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: paper,
+    backgroundColor: warna.bgSurface,
     shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg))),
     builder: (sheetContext) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(22, 14, 22, 22),
@@ -170,20 +171,22 @@ void showModalBarrierSheet(
                 width: 36,
                 height: 3,
                 decoration: BoxDecoration(
-                    color: rule, borderRadius: BorderRadius.circular(999)),
+                    color: warna.borderStrong,
+                    borderRadius: BorderRadius.circular(AppRadius.full)),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Tambah buku',
-                style: TextStyle(
-                    fontSize: 19, fontWeight: FontWeight.w700, color: ink)),
+            Text('Tambah buku',
+                style: AppType.uiTitle.copyWith(color: warna.textPrimary)),
             const SizedBox(height: 14),
             ListTile(
               key: const Key('src-camera'),
               contentPadding: EdgeInsets.zero,
               enabled: state.scanner.available,
               leading: Icon(Icons.photo_camera_outlined,
-                  color: state.scanner.available ? ink : ink3),
+                  color: state.scanner.available
+                      ? warna.textPrimary
+                      : warna.textDisabled),
               title: const Text('Foto buku fisik'),
               subtitle: Text(state.scanner.available
                   ? 'Satu bab saja sudah cukup untuk beberapa hari'
@@ -195,11 +198,12 @@ void showModalBarrierSheet(
                     }
                   : null,
             ),
-            const Divider(color: rule),
+            Divider(color: warna.borderDefault),
             ListTile(
               key: const Key('src-file'),
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.description_outlined, color: ink),
+              leading: Icon(Icons.description_outlined,
+                  color: warna.textPrimary),
               title: const Text('Pilih berkas'),
               subtitle: const Text('EPUB atau PDF berteks'),
               onTap: () {
@@ -207,11 +211,12 @@ void showModalBarrierSheet(
                 page._pickFile(context);
               },
             ),
-            const Divider(color: rule),
+            Divider(color: warna.borderDefault),
             ListTile(
               key: const Key('src-sample'),
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.auto_stories_outlined, color: ink),
+              leading: Icon(Icons.auto_stories_outlined,
+                  color: warna.textPrimary),
               title: const Text('Buku contoh'),
               subtitle: const Text('Enam bab, untuk mencoba alurnya'),
               onTap: () {
@@ -237,18 +242,18 @@ class _BookTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: surface,
+      color: warna.bgSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: rule),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        side: BorderSide(color: warna.borderDefault),
       ),
       child: ListTile(
         key: Key('book-${book.id}'),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         title: Text(book.title,
-            style: const TextStyle(fontWeight: FontWeight.w700, color: ink)),
+            style: AppType.uiTitleSmall.copyWith(color: warna.textPrimary)),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
@@ -260,7 +265,7 @@ class _BookTile extends StatelessWidget {
         ),
         trailing: IconButton(
           tooltip: 'Hapus dari rak',
-          icon: const Icon(Icons.delete_outline, color: ink2),
+          icon: Icon(Icons.delete_outline, color: warna.textSecondary),
           onPressed: () => state.removeBook(book),
         ),
         onTap: () => onOpen(book),

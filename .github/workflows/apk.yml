@@ -43,6 +43,13 @@ jobs:
           channel: stable
           cache: true
 
+      # Rantai desain→kode: design/tokens.json → tools/gen_tokens.py →
+      # app/lib/ui/tokens.g.dart. Kalau tokens.json diubah tapi generatornya
+      # tidak dijalankan, APK ini akan membawa warna lama tanpa ada yang
+      # menyadarinya. Diperiksa duluan supaya gagalnya cepat dan jelas.
+      - name: Periksa token desain mutakhir
+        run: python3 tools/gen_tokens.py --check
+
       - name: Ambil dependensi
         working-directory: app
         run: flutter pub get

@@ -76,7 +76,15 @@ flutter:
   assets:
     - assets/contoh.epub
 
+  # Nama family di bawah HARUS persis sama dengan pemetaan FAMILY di
+  # tools/gen_tokens.py. Kalau meleset, Flutter diam-diam jatuh ke font sistem
+  # tanpa satu pun pesan error — gejalanya cuma "kok hurufnya beda".
+  #
+  # Ketiganya berlisensi OFL, boleh di-embed dalam APK. Salinan lisensinya ada
+  # di assets/fonts/lisensi/ (tidak ikut dibundel; OFL mewajibkan disertakan
+  # dalam distribusi, dan repo ini adalah distribusinya).
   fonts:
+    # Antarmuka: kontrol, angka, label. Mayoritas layar.
     - family: Jakarta
       fonts:
         - asset: assets/fonts/PlusJakartaSans-400.ttf
@@ -93,6 +101,33 @@ flutter:
         - asset: assets/fonts/PlusJakartaSans-800-Italic.ttf
           weight: 800
           style: italic
+
+    # Bacaan: teks yang berjalan di pemutar, dan judul momen besar. Yang dibaca
+    # user adalah buku — serif membuat batas itu terasa tanpa garis pemisah.
+    #
+    # Literata aslinya font variabel dua sumbu (opsz 7–72, wght 200–900).
+    # Ketiga berkas di bawah adalah instance statis pada opsz 12 — ukuran optis
+    # yang memang dirancang untuk teks badan. Dipotong jadi statis karena
+    # Flutter tidak memilih sumbu wght sendiri dari fontWeight; tanpa ini,
+    # w600 dan w700 akan tampil sama persis dengan w400.
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata-400.ttf
+          weight: 400
+        - asset: assets/fonts/Literata-600.ttf
+          weight: 600
+        - asset: assets/fonts/Literata-700.ttf
+          weight: 700
+
+    # Aksesibilitas: pilihan yang bisa dinyalakan user di Pengaturan. Dirancang
+    # Braille Institute untuk low vision — bentuk 1 l I dan 0 O sengaja dibuat
+    # tidak mungkin tertukar.
+    - family: AtkinsonHyperlegible
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegible-400.ttf
+          weight: 400
+        - asset: assets/fonts/AtkinsonHyperlegible-700.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -25,7 +25,8 @@ class SettingsPage extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Pengingat harian'),
                 trailing: Text(s.reminderLabel,
-                    style: const TextStyle(color: ink2, fontSize: 14)),
+                    style: AppType.uiLabel
+                        .copyWith(color: warna.textSecondary)),
                 onTap: () async {
                   final picked = await showTimePicker(
                     context: context,
@@ -40,7 +41,7 @@ class SettingsPage extends StatelessWidget {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: s.reminderOn,
-                activeThumbColor: green,
+                activeThumbColor: warna.brandPrimary,
                 title: const Text('Notifikasi'),
                 subtitle: Text(
                     'Satu pengingat sehari. Di web tidak ada — notifikasi '
@@ -102,7 +103,7 @@ class SettingsPage extends StatelessWidget {
                                       value: v.id,
                                       child: Text(v.name,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 14)),
+                                          style: AppType.uiLabel),
                                     ))
                                 .toList(),
                             onChanged: (id) async {
@@ -133,7 +134,8 @@ class SettingsPage extends StatelessWidget {
                       },
                       icon: const Icon(Icons.play_circle_outline, size: 18),
                       label: const Text('Cicip suara ini'),
-                      style: TextButton.styleFrom(foregroundColor: greenDeep),
+                      style: TextButton.styleFrom(
+                          foregroundColor: warna.brandPrimary),
                     ),
                   ),
                 ),
@@ -156,7 +158,7 @@ class SettingsPage extends StatelessWidget {
                 key: const Key('set-large-text'),
                 contentPadding: EdgeInsets.zero,
                 value: s.largeText,
-                activeThumbColor: green,
+                activeThumbColor: warna.brandPrimary,
                 title: const Text('Huruf besar saat mendengar'),
                 subtitle: Text('Memperbesar teks yang berjalan di pemutar.',
                     style: bodyStyle.copyWith(fontSize: 12.5)),
@@ -172,7 +174,7 @@ class SettingsPage extends StatelessWidget {
                     'Terpakai ${(state.quota.usedSeconds() / 60).ceil()} menit. '
                     'Ada supaya alurnya bisa dicoba tanpa menunggu besok.',
                     style: bodyStyle.copyWith(fontSize: 12.5)),
-                trailing: const Icon(Icons.refresh, color: ink2),
+                trailing: Icon(Icons.refresh, color: warna.textSecondary),
                 onTap: state.resetQuota,
               ),
               const SizedBox(height: 22),
@@ -191,11 +193,11 @@ class SettingsPage extends StatelessWidget {
   Widget _group(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 2),
         child: Text(t,
-            style: const TextStyle(
+            style: AppType.uiCaption.copyWith(
                 fontSize: 11,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
-                color: ink3)),
+                color: warna.textDisabled)),
       );
 
   Widget _slider({
@@ -217,10 +219,12 @@ class SettingsPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(label, style: const TextStyle(fontSize: 15, color: ink)),
+                Text(label,
+                    style: AppType.uiBody.copyWith(color: warna.textPrimary)),
                 const Spacer(),
                 Text(display,
-                    style: const TextStyle(color: ink2, fontSize: 14)),
+                    style: AppType.uiLabel
+                        .copyWith(color: warna.textSecondary)),
               ],
             ),
             Slider(
@@ -228,7 +232,7 @@ class SettingsPage extends StatelessWidget {
               min: min,
               max: max,
               divisions: divisions,
-              activeColor: green,
+              activeColor: warna.brandPrimary,
               onChanged: onChanged,
             ),
             if (note != null)

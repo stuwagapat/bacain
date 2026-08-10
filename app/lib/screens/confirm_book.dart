@@ -50,8 +50,7 @@ class _ConfirmBookPageState extends State<ConfirmBookPage> {
         padding: const EdgeInsets.fromLTRB(26, 8, 26, 28),
         children: [
           Text(widget.book.title,
-              style: const TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.w700, color: ink)),
+              style: AppType.uiTitle.copyWith(color: warna.textPrimary)),
           if (widget.book.author.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -60,7 +59,7 @@ class _ConfirmBookPageState extends State<ConfirmBookPage> {
           const SizedBox(height: 26),
           Text('± $days hari mendengar',
               key: const Key('estimated-days'),
-              style: titleStyle.copyWith(fontSize: 34)),
+              style: AppType.uiDisplay.copyWith(color: warna.textPrimary)),
           const SizedBox(height: 8),
           Text(
             '${widget.segments.length} bagian · sekitar $totalMinutes menit total. '
@@ -68,12 +67,12 @@ class _ConfirmBookPageState extends State<ConfirmBookPage> {
             style: bodyStyle,
           ),
           const SizedBox(height: 28),
-          const Text('SUARA PEMBACA',
-              style: TextStyle(
+          Text('SUARA PEMBACA',
+              style: AppType.uiCaption.copyWith(
                   fontSize: 11,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w700,
-                  color: ink3)),
+                  color: warna.textDisabled)),
           const SizedBox(height: 8),
           if (voices.isEmpty)
             Text(
@@ -87,9 +86,10 @@ class _ConfirmBookPageState extends State<ConfirmBookPage> {
                   contentPadding: EdgeInsets.zero,
                   value: v.id,
                   groupValue: _voiceId,
-                  activeColor: green,
+                  activeColor: warna.brandPrimary,
                   title: Text(v.name,
-                      style: const TextStyle(fontSize: 15, color: ink)),
+                      style:
+                          AppType.uiBody.copyWith(color: warna.textPrimary)),
                   subtitle: Text(v.lang, style: bodyStyle.copyWith(fontSize: 12)),
                   onChanged: (id) => setState(() => _voiceId = id),
                 )),

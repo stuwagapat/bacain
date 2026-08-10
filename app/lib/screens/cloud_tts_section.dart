@@ -103,10 +103,11 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
                         'Buka untuk melihat alasannya.'
                     : 'Belum aktif — memakai suara bawaan perangkat.',
             style: bodyStyle.copyWith(
-                fontSize: 12.5, color: _aktif ? greenDeep : ink2),
+                fontSize: 12.5,
+                color: _aktif ? warna.statusSuccess : warna.textSecondary),
           ),
           trailing: Icon(_terbuka ? Icons.expand_less : Icons.expand_more,
-              color: ink2),
+              color: warna.textSecondary),
           onTap: () => setState(() => _terbuka = !_terbuka),
         ),
 
@@ -115,7 +116,7 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
 
           if (tertanam)
             _kotak(
-              _aktif ? greenDeep : orange,
+              _aktif ? warna.statusSuccess : warna.statusWarning,
               BuildConfig.bakedKeyIsExposed
                   ? 'Build ini membawa kunci Google di dalamnya, jadi tidak '
                       'ada yang perlu diketik. Tapi kunci itu ikut ke dalam '
@@ -179,7 +180,9 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
           if (_pesan != null)
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: _kotak(_berhasil ? greenDeep : orange, _pesan!),
+              child: _kotak(
+                  _berhasil ? warna.statusSuccess : warna.statusWarning,
+                  _pesan!),
             ),
 
           if (_aktif) ...[
@@ -188,7 +191,7 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
               key: const Key('tts-all-voices'),
               contentPadding: EdgeInsets.zero,
               value: widget.state.showAllVoices,
-              activeThumbColor: green,
+              activeThumbColor: warna.brandPrimary,
               title: const Text('Bandingkan semua suara'),
               subtitle: Text(
                   'Menampilkan seluruh suara Google beserta nama modelnya di '
@@ -218,7 +221,7 @@ class _CloudTtsSectionState extends State<CloudTtsSection> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: warna.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         child: SelectableText(
           teks,

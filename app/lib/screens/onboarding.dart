@@ -59,14 +59,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Widget _slide((String, String) s) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('BACAIN',
-              style: TextStyle(
-                  fontSize: 12,
+          Text('BACAIN',
+              style: AppType.uiCaption.copyWith(
                   letterSpacing: 2,
                   fontWeight: FontWeight.w700,
-                  color: ink2)),
+                  color: warna.textSecondary)),
           const Spacer(),
-          Text(s.$1, style: titleStyle.copyWith(fontSize: 28)),
+          Text(s.$1,
+              style: AppType.uiDisplay.copyWith(color: warna.textPrimary)),
           const SizedBox(height: 14),
           Text(s.$2, style: bodyStyle),
           const Spacer(),
@@ -84,9 +84,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Widget _timeStep() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kapan kamu mau dengar?',
-              style: TextStyle(
-                  fontSize: 15, color: ink2, fontWeight: FontWeight.w600)),
+          Text('Kapan kamu mau dengar?',
+              style: AppType.uiHeadline.copyWith(color: warna.textPrimary)),
           const SizedBox(height: 18),
           GestureDetector(
             key: const Key('pick-time'),
@@ -98,10 +97,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             child: Text(
               '${_time.hour.toString().padLeft(2, '0')} : '
               '${_time.minute.toString().padLeft(2, '0')}',
-              style: const TextStyle(
+              style: AppType.uiDisplay.copyWith(
                   fontSize: 62,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
+                  fontWeight: FontWeight.w700,
+                  color: warna.textPrimary,
                   height: 1),
             ),
           ),
@@ -113,9 +112,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             key: const Key('reminder-toggle'),
             contentPadding: EdgeInsets.zero,
             value: _reminderOn,
-            activeThumbColor: green,
-            title: const Text('Ingatkan saya tiap hari',
-                style: TextStyle(fontSize: 15, color: ink)),
+            activeThumbColor: warna.brandPrimary,
+            title: Text('Ingatkan saya tiap hari',
+                style: AppType.uiBody.copyWith(color: warna.textPrimary)),
             subtitle: Text(
               'Pengingat sungguhan menyusul di versi Android. '
               'Di web ini jamnya cuma disimpan.',
@@ -140,8 +139,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             width: active ? 20 : 7,
             height: 4,
             decoration: BoxDecoration(
-              color: active ? orange : rule,
-              borderRadius: BorderRadius.circular(999),
+              color: active ? warna.brandPrimary : warna.borderStrong,
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
           );
         }),

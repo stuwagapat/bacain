@@ -450,3 +450,54 @@ sandbox, jadi jangan dianggap beres sampai ada yang mencobanya:
 produktivitas — persentase, bar progres, hitungan bab di mana-mana — padahal
 positioning produknya justru menolak itu. Angka-angka itu sudah dicabut; jaga
 supaya tidak diam-diam kembali.
+
+---
+
+## Rantai desain → kode (Agustus 2026)
+
+Dulu `app/lib/ui/tokens.dart` menulis hex-nya sendiri dan `design/tokens.json`
+tidak pernah dibaca siapa pun. Sekarang tersambung:
+
+```
+design/tokens.json  →  python3 tools/gen_tokens.py  →  app/lib/ui/tokens.g.dart
+```
+
+- `tokens.g.dart` **dihasilkan mesin** — jangan diedit tangan, akan tertimpa.
+- `tokens.dart` tinggal jadi lapisan tipis: satu pintu warna (`warna`), tiga
+  gaya turunan, dan widget buatan tangan (`PrimaryButton`, `QuietButton`,
+  `QuotaBar`).
+- **Tidak ada satu pun `Color(0x…)` tertulis tangan di `lib/`** — dijaga oleh
+  `test/tokens_test.dart`, dan `gen_tokens.py --check` jalan di CI sebelum APK
+  dibangun. Kalau tokens.json berubah tanpa generator dijalankan, build gagal
+  di situ, bukan diam-diam membawa warna lama.
+
+**Tema bawaan sekarang gelap.** Bukan selera: app ini didengarkan menjelang
+tidur. `AppColors.light` sudah ikut dihasilkan dan nilainya masuk akal, tapi
+**belum pernah ditata di layar mana pun** — jangan dinyalakan sebelum didesain.
+Mode terang bukan pembalikan warna.
+
+**Tiga peran huruf**, semuanya OFL dan aman di-embed:
+
+| Token | Family | Dipakai untuk |
+|---|---|---|
+| `AppType.uiFamily` | Jakarta | kontrol, angka, label |
+| `AppType.readingFamily` | Literata | teks bacaan di pemutar, judul momen besar |
+| `AppType.a11yFamily` | AtkinsonHyperlegible | opsi aksesibilitas (belum ada tombolnya) |
+
+Literata aslinya font variabel dua sumbu; yang dibundel adalah instance statis
+pada `opsz 12` untuk bobot 400/600/700. Dipotong statis karena Flutter tidak
+memilih sumbu `wght` sendiri dari `fontWeight` — tanpa itu w600 dan w700 tampil
+sama persis dengan w400.
+
+**Yang belum dikerjakan dari `design/serah-terima.md`:**
+
+- Empat layar baru: *Siap memotret* (4b), *Halaman terkumpul* (4d), dan versi
+  penuh *Sebelumnya…* serta *Jatah habis* sesuai papan desain.
+- Dua label wajib di layar recap (`Terakhir kamu dengar … lalu` dan
+  `Sedang dibacakan`).
+- Pil hint sekali-tampil `Ketuk teks untuk mode fokus` di pemutar.
+- Rak masih daftar satu kolom, belum grid 2 kolom dengan kartu LANJUTKAN dan
+  sampul `AppCover.forTitle`.
+- Penandaan kata yang diragukan OCR di `review_scan`.
+- `readingHighlightBg` **belum diuji di layar HP dalam gelap** — baru di
+  monitor. Yang lembut di monitor bisa menyilaukan di kamar.

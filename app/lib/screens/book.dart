@@ -49,13 +49,17 @@ class BookPage extends StatelessWidget {
                         : isNext
                             ? Icons.play_circle_fill
                             : Icons.lock_outline,
-                    color: done ? ink3 : (isNext ? green : rule),
+                    // Status dibedakan BENTUK lebih dulu — centang, lingkaran
+                    // penuh, gembok — supaya tetap terbaca tanpa warna.
+                    color: done
+                        ? warna.textDisabled
+                        : (isNext ? warna.brandPrimary : warna.borderStrong),
                   ),
                   title: Text(
                     s.title.isEmpty ? 'Bagian ${i + 1}' : s.title,
-                    style: TextStyle(
-                      fontWeight: isNext ? FontWeight.w700 : FontWeight.w500,
-                      color: open ? ink : ink3,
+                    style: AppType.uiTitleSmall.copyWith(
+                      fontWeight: isNext ? FontWeight.w700 : FontWeight.w600,
+                      color: open ? warna.textPrimary : warna.textDisabled,
                     ),
                   ),
                   subtitle: Text(
