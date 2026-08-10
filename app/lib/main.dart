@@ -17,6 +17,7 @@ import 'platform/speech_engine_factory.dart';
 import 'screens/book.dart';
 import 'screens/library.dart';
 import 'screens/onboarding.dart';
+import 'ui/bingkai_ponsel.dart';
 import 'ui/tokens.dart';
 
 void main() {
@@ -91,6 +92,12 @@ class _BacainAppState extends State<BacainApp> {
         ),
         dividerColor: warna.borderDefault,
       ),
+      // Dipasang di `builder`, bukan membungkus `home`: builder membungkus
+      // Navigator, jadi SELURUH layar ikut dibatasi — termasuk pemutar,
+      // pengaturan, dan bottom sheet yang didorong belakangan. Membungkus
+      // `home` saja akan membuat layar pertama rapi lalu sisanya melar.
+      builder: (context, child) =>
+          BingkaiPonsel(child: child ?? const SizedBox.shrink()),
       home: AnimatedBuilder(
         animation: widget.state,
         builder: (context, _) {

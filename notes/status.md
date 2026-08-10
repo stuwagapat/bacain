@@ -558,3 +558,24 @@ Yang dibuang cuma yang terbukti tidak terjangkau, berdasarkan kode pemilih di
 satu-satunya browser yang ada di lingkungan ini Chromium, dan memalsukan
 user-agent tidak mengubah mesinnya. Jadi varian itu tidak boleh dibuang atas
 dasar "tidak pernah terlihat diminta".
+
+
+## Bingkai HP di prototipe web
+
+Flutter web mengisi seluruh jendela. Di HP itu benar; di laptop app-nya melar
+selebar layar, dan tata letak yang dinilai jadi bukan tata letak yang akan
+dilihat orang — baris terlalu panjang, kartu LANJUTKAN membentang, rak dua
+kolom terlihat renggang.
+
+`lib/ui/bingkai_ponsel.dart` membatasi app ke **390 × 844 dp** (artboard
+desain) begitu jendelanya lebih lebar dari **520 dp**. Dipasang di
+`MaterialApp.builder`, bukan membungkus `home` — builder membungkus Navigator,
+jadi seluruh layar ikut dibatasi termasuk yang didorong belakangan.
+
+**MediaQuery ikut dipersempit, bukan cuma kotaknya.** Tanpa itu apa pun yang
+bertanya "selebar apa layarnya" akan dijawab lebar jendela laptop.
+
+Ambang 520 dp dipilih di atas HP Android terlebar (±480 dp lebar logis).
+`test/bingkai_test.dart` menjaga itu: kalau ambangnya salah geser, APK di HP
+besar ikut terbingkai 390 dp di tengah layar — kerusakan yang tidak akan
+pernah terlihat dari sesi pengembangan di laptop.
