@@ -536,3 +536,21 @@ yang benar-benar ada lebih dulu, jadi pengalihan itu tidak mengganggu aset.
 Sisa satu permintaan keluar ke `fonts.gstatic.com` untuk Roboto — font
 cadangan bawaan Flutter, bukan yang dipakai app. Tidak fatal; app tetap jalan
 kalau diblokir.
+
+**Keluaran dipangkas dari 43 MB jadi 19 MB.** Penting karena `docs/` ikut masuk
+git: tiap kali dibangun ulang, seluruh berkasnya jadi objek baru di riwayat.
+Yang dibuang cuma yang terbukti tidak terjangkau, berdasarkan kode pemilih di
+`flutter_bootstrap.js` — bukan tebakan:
+
+| Dibuang | Alasan |
+|---|---|
+| `*.symbols` | peta simbol untuk membaca jejak tumpukan; alat pengembang yang memakainya |
+| `skwasm*`, `wimp*` | cuma dijangkau di dalam pemuat skwasm, dan build ini ber-`renderer: "canvaskit"` |
+| `experimental_webparagraph/` | butuh opt-in `canvasKitVariant` yang tidak dipasang |
+
+**Dua varian CanvasKit tetap tinggal**, dan itu disengaja: Chromium mengambil
+`canvaskit/chromium/*`, mesin lain (WebKit di iPhone, Gecko) mengambil
+`canvaskit/canvaskit.*`. Jalur non-Chromium **tidak bisa diuji dari sini** —
+satu-satunya browser yang ada di lingkungan ini Chromium, dan memalsukan
+user-agent tidak mengubah mesinnya. Jadi varian itu tidak boleh dibuang atas
+dasar "tidak pernah terlihat diminta".
