@@ -489,15 +489,29 @@ pada `opsz 12` untuk bobot 400/600/700. Dipotong statis karena Flutter tidak
 memilih sumbu `wght` sendiri dari `fontWeight` — tanpa itu w600 dan w700 tampil
 sama persis dengan w400.
 
-**Yang belum dikerjakan dari `design/serah-terima.md`:**
+**Sudah dikerjakan dari `design/serah-terima.md`:**
 
-- Empat layar baru: *Siap memotret* (4b), *Halaman terkumpul* (4d), dan versi
-  penuh *Sebelumnya…* serta *Jatah habis* sesuai papan desain.
-- Dua label wajib di layar recap (`Terakhir kamu dengar … lalu` dan
-  `Sedang dibacakan`).
-- Pil hint sekali-tampil `Ketuk teks untuk mode fokus` di pemutar.
-- Rak masih daftar satu kolom, belum grid 2 kolom dengan kartu LANJUTKAN dan
-  sampul `AppCover.forTitle`.
-- Penandaan kata yang diragukan OCR di `review_scan`.
+- Layar **Siap memotret** (4b) — muncul sekali, flag `cameraBriefed`. Tiga
+  panduan, yang ketiga soal potret otomatis. Tanpa itu user menekan rana
+  berkali-kali dan menghasilkan halaman kembar.
+- Layar **Halaman terkumpul** (4d) — grid tiga kolom setelah kembali dari
+  pemindai, **sebelum** OCR jalan. Halaman yang hampir tidak terbaca ditandai
+  di sini, saat memfoto ulang masih murah. Tekan lama untuk mengubah urutan.
+- **Rak dua kolom** dengan kartu LANJUTKAN sebagai satu-satunya bidang warna
+  besar, dan sampul dari `AppCover.forTitle`. Rak kosong menawarkan dua tombol
+  langsung, tanpa lembar pilihan di tengah.
+- **Jatah habis** berlatar merek penuh, angka besar, dan tombol dengar-ulang
+  yang tidak pernah dikunci — dijaga uji.
+- **Recap** dengan dua label wajibnya dan indikator "Sedang dibacakan".
+- **Pil hint** `Ketuk teks untuk mode fokus`, sekali tampil, tersimpan.
+- **Kata yang diragukan OCR** ditandai `statusWarning` bergaris titik, langsung
+  di dalam kotak isian. Sumber keraguan: skor ML Kit kalau ada, kalau tidak
+  bentuk katanya sendiri (`core/scan/ocr_doubt.dart`, 18 uji).
+
+**Yang masih terbuka:**
+
 - `readingHighlightBg` **belum diuji di layar HP dalam gelap** — baru di
   monitor. Yang lembut di monitor bisa menyilaukan di kamar.
+- Mode terang belum ditata di layar mana pun.
+- Mini player 64 dp belum ada di layar utama.
+- Ringkasan recap masih kalimat asli bagian sebelumnya, bukan ringkasan AI.

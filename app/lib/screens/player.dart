@@ -48,31 +48,61 @@ class RecapPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 40),
-            Text('SEBELUMNYA…',
-                style: AppType.uiCaption.copyWith(
-                    fontSize: 11,
-                    letterSpacing: 1.4,
-                    fontWeight: FontWeight.w700,
-                    color: warna.textDisabled)),
-            const SizedBox(height: 20),
+            // Menjawab "kenapa layar ini muncul" — pertanyaan yang cuma ada
+            // di hari kedua, persis saat tidak ada yang menjelaskan.
+            if (state.jedaTerakhir != null)
+              Center(
+                child: Text(
+                  'TERAKHIR KAMU DENGAR ${state.jedaTerakhir!.toUpperCase()}',
+                  key: const Key('recap-jeda'),
+                  style: AppType.uiCaption.copyWith(
+                      fontSize: 11,
+                      letterSpacing: 1.4,
+                      fontWeight: FontWeight.w700,
+                      color: warna.textDisabled),
+                ),
+              ),
+            const SizedBox(height: 14),
+            Center(
+              child: Text('Sebelumnya…',
+                  style: AppType.uiHeadline.copyWith(
+                      fontSize: 27, color: warna.textSecondary)),
+            ),
+            const SizedBox(height: 24),
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
                   state.recapText(),
                   key: const Key('recap-text'),
+                  textAlign: TextAlign.center,
                   style: AppType.readingRecap
                       .copyWith(color: warna.readingTextActive),
                 ),
               ),
             ),
-            // Jujur soal apa yang belum ada: ini kalimat asli dari bagian
-            // sebelumnya, bukan ringkasan yang dirangkum AI.
-            Text(
-              'Ini kalimat penutup bagian sebelumnya. Ringkasan yang benar-benar '
-              'merangkum menyusul saat Claude tersambung.',
-              style: bodyStyle.copyWith(fontSize: 12.5),
+            // Menjawab "kenapa tiba-tiba ada suara". Teks recap langsung
+            // disuarakan begitu layar terbuka, dan tanpa penanda ini suaranya
+            // terasa datang entah dari mana.
+            const _IndikatorSuara(),
+            const SizedBox(height: 6),
+            Center(
+              child: Text('Sedang dibacakan',
+                  key: const Key('recap-dibacakan'),
+                  style: AppType.uiCaption
+                      .copyWith(color: warna.textDisabled)),
             ),
             const SizedBox(height: 18),
+            // Jujur soal apa yang belum ada: ini kalimat asli dari bagian
+            // sebelumnya, bukan ringkasan yang dirangkum AI.
+            Center(
+              child: Text(
+                'Ini kalimat penutup bagian sebelumnya — ringkasan yang '
+                'benar-benar merangkum menyusul.',
+                textAlign: TextAlign.center,
+                style: bodyStyle.copyWith(fontSize: 12.5),
+              ),
+            ),
+            const SizedBox(height: 14),
             PrimaryButton(
               'Lanjut ke ${next?.title ?? 'bagian berikutnya'}',
               key: const Key('recap-continue'),
@@ -91,56 +121,161 @@ class RecapPage extends StatelessWidget {
 
 // ── jatah habis ────────────────────────────────────────────────────
 
+/// Harus terasa seperti garis finis, bukan tembok.
+///
+/// Satu-satunya layar dengan latar merek penuh di seluruh app — dan itu
+/// disengaja: ia muncul paling banyak sekali sehari, jadi ia boleh menjadi
+/// kejadian. Nadanya memberi selamat, bukan menghalangi.
 class QuotaExhaustedPage extends StatelessWidget {
   final AppState state;
   const QuotaExhaustedPage({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
-    final used = state.settings.dailyMinutes;
+    final menit = (state.quota.usedSeconds() / 60).round();
+    final tinta = warna.brandOnPrimary;
+
     return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 8, 28, 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Spacer(),
-            Text('Sampai di sini dulu hari ini.',
-                key: const Key('quota-title'), style: titleStyle.copyWith(fontSize: 27)),
-            const SizedBox(height: 14),
-            Text('Kamu mendengar $used menit hari ini. Lumayan.',
-                style: bodyStyle.copyWith(
-                    color: warna.textPrimary, fontSize: 15.5)),
-            const SizedBox(height: 6),
-            Text(
-              'Bagian berikutnya kami siapkan untuk besok pagi, '
-              'jam ${state.settings.reminderLabel}.',
-              style: bodyStyle,
-            ),
-            const Spacer(),
-            Divider(color: warna.borderDefault),
-            const SizedBox(height: 10),
-            Text(
-              'Bagian yang sudah pernah didengar tidak memakan jatah — '
-              'buka saja dari daftar bagian.',
-              style: bodyStyle.copyWith(fontSize: 13),
-            ),
-            const SizedBox(height: 14),
-            PrimaryButton('Kembali ke daftar bagian',
-                onPressed: () => Navigator.of(context).pop()),
-            Center(
-              child: QuietButton(
-                'Kembalikan jatah (untuk uji coba)',
+      backgroundColor: warna.brandPrimary,
+      appBar: AppBar(
+        backgroundColor: warna.brandPrimary,
+        foregroundColor: tinta,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 0, 28, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(),
+              // Biarkan angkanya yang pamer. Tidak ada tanda seru di mana pun
+              // di app ini; besarnya angka sudah cukup jadi perayaan.
+              Text('$menit',
+                  key: const Key('quota-menit'),
+                  textAlign: TextAlign.center,
+                  style: AppType.uiDisplay.copyWith(
+                      fontSize: 104, height: 0.9, color: tinta)),
+              const SizedBox(height: 10),
+              Text('MENIT HARI INI',
+                  textAlign: TextAlign.center,
+                  style: AppType.uiCaption.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                      color: tinta.withValues(alpha: 0.56))),
+              const SizedBox(height: 22),
+              Text('Cukup untuk hari ini. Lumayan, kan?',
+                  key: const Key('quota-title'),
+                  textAlign: TextAlign.center,
+                  style: AppType.uiHeadline
+                      .copyWith(fontSize: 26, color: tinta)),
+              const SizedBox(height: 11),
+              Text(
+                'Bagian berikutnya kami siapkan untuk besok, jam '
+                '${state.settings.reminderLabel}. Sampai besok, ya.',
+                textAlign: TextAlign.center,
+                style: AppType.uiBody.copyWith(
+                    fontSize: 14,
+                    height: 1.55,
+                    color: tinta.withValues(alpha: 0.72)),
+              ),
+              const Spacer(),
+
+              // Tombol paling menonjol di layar ini, dan TIDAK PERNAH dikunci:
+              // bagian yang sudah pernah disintesis tidak menimbulkan biaya
+              // baru, jadi tidak ada alasan menghalanginya.
+              FilledButton(
+                key: const Key('quota-ulang'),
+                onPressed: () => Navigator.of(context).pop(),
+                style: FilledButton.styleFrom(
+                  backgroundColor: tinta,
+                  foregroundColor: warna.bgSurfaceVariant,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: const StadiumBorder(),
+                ),
+                child: Text('Dengar ulang bagian lama',
+                    style: AppType.uiLabel.copyWith(fontSize: 15.5)),
+              ),
+              TextButton(
                 key: const Key('quota-reset'),
                 onPressed: () async {
                   await state.resetQuota();
                   if (context.mounted) Navigator.of(context).pop();
                 },
+                style: TextButton.styleFrom(
+                    foregroundColor: tinta.withValues(alpha: 0.62)),
+                child: Text('Kembalikan jatah (untuk uji coba)',
+                    style: AppType.uiLabel),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Lima batang yang bergerak — penanda bahwa ada yang sedang dibacakan.
+///
+/// Sengaja bukan animasi berkelanjutan yang berat: lima `AnimatedContainer`
+/// yang berdenyut sudah menyampaikan "ini hidup", dan berhenti sendiri saat
+/// pengguna memilih mengurangi gerak.
+class _IndikatorSuara extends StatefulWidget {
+  const _IndikatorSuara();
+
+  @override
+  State<_IndikatorSuara> createState() => _IndikatorSuaraState();
+}
+
+class _IndikatorSuaraState extends State<_IndikatorSuara>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  );
+
+  static const _tinggi = [8.0, 18.0, 26.0, 14.0, 7.0];
+
+  @override
+  void initState() {
+    super.initState();
+    _c.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final diam = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return Padding(
+      padding: const EdgeInsets.only(top: 22, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (var i = 0; i < _tinggi.length; i++)
+            AnimatedBuilder(
+              animation: _c,
+              builder: (context, _) {
+                final fase = (_c.value + i * 0.16) % 1.0;
+                final skala = diam ? 1.0 : 0.45 + 0.55 * (1 - (fase - 0.5).abs() * 2);
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: 3,
+                  height: _tinggi[i] * skala,
+                  decoration: BoxDecoration(
+                    color: warna.brandPrimary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }
@@ -161,6 +296,7 @@ class _PlayerPageState extends State<PlayerPage> {
   int _lastScrolled = -1;
   bool _focusMode = false;
   bool _quotaShown = false;
+  bool _hintTertutup = false;
 
   @override
   void initState() {
@@ -310,6 +446,12 @@ class _PlayerPageState extends State<PlayerPage> {
                   _lastScrolled = i;
                   player.seekTo(i);
                 },
+                onLongPress: () {
+                  // Gesturnya tetap ada — ikon di app bar untuk penemuan,
+                  // tekan lama untuk yang sudah tahu.
+                  if (!widget.state.settings.focusHintSeen) _tutupHint();
+                  setState(() => _focusMode = true);
+                },
                 child: Container(
                   width: double.infinity,
                   padding:
@@ -344,9 +486,47 @@ class _PlayerPageState extends State<PlayerPage> {
             },
           ),
         ),
+        // Mode fokus dulu cuma gestur ketuk-teks: tidak ada petunjuk apa pun,
+        // jadi hampir tidak akan ditemukan. Pil ini muncul sekali lalu tidak
+        // pernah kembali — petunjuk yang terus muncul berubah jadi kebisingan.
+        if (!widget.state.settings.focusHintSeen && !_hintTertutup)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Center(
+              child: Material(
+                color: warna.bgSurface,
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                child: InkWell(
+                  key: const Key('focus-hint'),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  onTap: _tutupHint,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 8, 12, 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Ketuk teks untuk mode fokus',
+                            style: AppType.uiCaption
+                                .copyWith(color: warna.textDisabled)),
+                        const SizedBox(width: 9),
+                        Icon(Icons.close, size: 12, color: warna.textDisabled),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         _controls(player),
       ],
     );
+  }
+
+  /// Ditutup sekali, hilang selamanya — termasuk sesudah app ditutup.
+  Future<void> _tutupHint() async {
+    setState(() => _hintTertutup = true);
+    final s = widget.state.settings;
+    await widget.state.updateSettings(s.copyWith(focusHintSeen: true));
   }
 
   /// [fokus] bukan "versi gelap" — seluruh app sudah gelap. Yang dibedakan

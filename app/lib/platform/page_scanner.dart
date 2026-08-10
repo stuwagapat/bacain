@@ -65,7 +65,11 @@ class MlKitPageScanner implements PageScanner {
         try {
           final hasil =
               await recognizer.processImage(InputImage.fromFilePath(path));
-          out.add(ScannedPage(imagePath: path, text: hasil.text));
+          out.add(ScannedPage(
+            imagePath: path,
+            text: hasil.text,
+            keyakinan: _skorPerKata(hasil),
+          ));
         } catch (_) {
           // Satu halaman gagal dibaca tetap masuk daftar dengan teks kosong,
           // supaya user melihatnya di layar tinjau dan bisa mengetik sendiri
@@ -78,4 +82,24 @@ class MlKitPageScanner implements PageScanner {
       await recognizer.close();
     }
   }
+}
+
+/// Skor keyakinan per kata, untuk menandai kata yang mungkin salah baca.
+///
+/// Kalau satu kata muncul beberapa kali dengan skor berbeda, yang TERENDAH
+/// yang dipakai: satu kemunculan yang meragukan sudah cukup alasan untuk
+/// meminta user melihatnya.
+Map<String, double> _skorPerKata(RecognizedText hasil) {
+  final out = <String, double>{};
+  for (final blok in hasil.blocks) {
+    for (final baris in blok.lines) {
+      for (final kata in baris.elements) {
+        final skor = kata.confidence;
+        if (skor == null) continue;
+        final ada = out[kata.text];
+        if (ada == null || skor < ada) out[kata.text] = skor;
+      }
+    }
+  }
+  return out;
 }

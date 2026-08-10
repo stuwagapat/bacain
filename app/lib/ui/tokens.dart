@@ -78,6 +78,37 @@ class PrimaryButton extends StatelessWidget {
       );
 }
 
+/// Tombol kedua yang tetap terlihat sebagai tombol. Dipakai saat ada dua
+/// jalan yang sama-sama sah — memfoto dan mengambil berkas — dan menjadikan
+/// salah satunya teks polos akan menyembunyikannya.
+class SecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  const SecondaryButton(this.label, {super.key, this.onPressed, this.icon});
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: warna.textPrimary,
+          side: BorderSide(color: warna.borderStrong),
+          minimumSize: const Size.fromHeight(52),
+          shape: const StadiumBorder(),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 19),
+              const SizedBox(width: AppSpacing.space2),
+            ],
+            Text(label, style: AppType.uiLabel.copyWith(fontSize: 15.5)),
+          ],
+        ),
+      );
+}
+
 class QuietButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;

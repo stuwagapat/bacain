@@ -12,10 +12,22 @@ class ScannedPage {
   final String imagePath;
   final String text;
 
-  const ScannedPage({required this.imagePath, required this.text});
+  /// Skor keyakinan ML Kit per kata, kalau modelnya memberi. Sering kosong —
+  /// model Latin bawaan mengembalikan null di banyak perangkat — jadi layar
+  /// tinjau tidak boleh bergantung padanya, cuma memakainya kalau ada.
+  final Map<String, double> keyakinan;
 
-  ScannedPage copyWith({String? text}) =>
-      ScannedPage(imagePath: imagePath, text: text ?? this.text);
+  const ScannedPage({
+    required this.imagePath,
+    required this.text,
+    this.keyakinan = const {},
+  });
+
+  ScannedPage copyWith({String? text}) => ScannedPage(
+        imagePath: imagePath,
+        text: text ?? this.text,
+        keyakinan: keyakinan,
+      );
 }
 
 abstract class PageScanner {

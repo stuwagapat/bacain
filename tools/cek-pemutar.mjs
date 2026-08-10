@@ -73,9 +73,16 @@ try {
   }
   await shot('01-rak');
 
-  await tap(/Tambah buku/i);
-  await shot('02-sheet-sumber');
-  await tap(/Buku contoh/i);
+  // Rak kosong menawarkan buku contoh langsung, tanpa lembar pilihan di
+  // tengah. Kalau rak sudah terisi, jalurnya lewat petak "Tambah".
+  const contoh = page.getByText(/Coba dengan buku contoh/i).last();
+  if (await contoh.count().catch(() => 0)) {
+    await contoh.click({ force: true });
+  } else {
+    await tap(/Tambah/i);
+    await shot('02-sheet-sumber');
+    await tap(/Buku contoh/i);
+  }
   await page.waitForTimeout(1500);
   await shot('03-konfirmasi');
 

@@ -124,6 +124,23 @@ class AppState extends ChangeNotifier {
     return clock().difference(last) >= recapAfter;
   }
 
+  /// Berapa lama sejak terakhir mendengar, dalam kalimat yang bisa dibaca.
+  ///
+  /// Layar recap muncul tiba-tiba di hari kedua, dan pertanyaan pertama user
+  /// adalah "kenapa layar ini ada". Menyebut jedanya menjawab itu dalam satu
+  /// baris — tanpa itu, layarnya terasa seperti app-nya bingung.
+  String? get jedaTerakhir {
+    final last = _active?.lastListenedAt;
+    if (last == null) return null;
+    final beda = clock().difference(last);
+    if (beda.inDays >= 1) {
+      final hari = beda.inDays;
+      return hari == 1 ? 'kemarin' : '$hari hari lalu';
+    }
+    if (beda.inHours >= 1) return '${beda.inHours} jam lalu';
+    return 'baru saja';
+  }
+
   /// Kalimat terakhir yang didengar dari bagian sebelumnya. Berdiri sebagai
   /// pengganti ringkasan AI sampai Claude tersambung — jujur menampilkan
   /// kalimat asli, bukan mengarang ringkasan.
@@ -169,7 +186,7 @@ class AppState extends ChangeNotifier {
       await reminders.cancelAll();
       return;
     }
-    final book = _nextUp;
+    final book = nextUp;
     await reminders.replaceAll(planner.plan(
       clock(),
       _settings,
@@ -180,8 +197,8 @@ class AppState extends ChangeNotifier {
   }
 
   /// Buku yang paling wajar dilanjutkan: yang terakhir didengar dan belum
-  /// tamat. Dipakai untuk menyebut nama buku di teks pengingat.
-  StoredBook? get _nextUp {
+  /// tamat. Dipakai di kartu LANJUTKAN di rak dan di teks pengingat.
+  StoredBook? get nextUp {
     final belum = _books.where((b) => !b.isFinished).toList();
     if (belum.isEmpty) return null;
     belum.sort((a, b) {

@@ -53,6 +53,11 @@ class StoredBook {
 
   int get remainingCount => segments.length - (lastFinishedIndex + 1);
 
+  /// Bagian yang sudah selesai dibagi seluruh bagian. Dipakai di rak.
+  double get progress => segments.isEmpty
+      ? 0
+      : ((lastFinishedIndex + 1) / segments.length).clamp(0.0, 1.0);
+
   /// Berapa lama sejak terakhir mendengar. Dipakai untuk memutuskan apakah
   /// ringkasan "sebelumnya..." perlu ditampilkan.
   Duration? get sinceLastListened => lastListenedAt == null

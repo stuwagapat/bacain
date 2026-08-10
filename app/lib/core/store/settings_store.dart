@@ -27,6 +27,14 @@ class AppSettings {
   /// Teks bacaan diperbesar — opsi keterbacaan, bukan pemanis.
   final bool largeText;
 
+  /// Sudah pernah melihat panduan memotret. Layar itu muncul SEKALI, sebelum
+  /// kamera pertama kali dibuka — sesudahnya ia cuma menghalangi.
+  final bool cameraBriefed;
+
+  /// Sudah pernah menutup pil "Ketuk teks untuk mode fokus". Petunjuk sekali
+  /// tampil yang terus muncul berubah jadi kebisingan.
+  final bool focusHintSeen;
+
   /// Alamat server sintesis sendiri. Jalur produksi: kuncinya ada di server
   /// dan tidak pernah masuk APK.
   final String? ttsProxyUrl;
@@ -45,6 +53,8 @@ class AppSettings {
     this.rate = 1.0,
     this.voiceId,
     this.largeText = false,
+    this.cameraBriefed = false,
+    this.focusHintSeen = false,
     this.ttsProxyUrl,
     this.ttsApiKey,
   });
@@ -66,6 +76,8 @@ class AppSettings {
     double? rate,
     String? voiceId,
     bool? largeText,
+    bool? cameraBriefed,
+    bool? focusHintSeen,
     String? ttsProxyUrl,
     String? ttsApiKey,
   }) =>
@@ -78,6 +90,8 @@ class AppSettings {
         rate: rate ?? this.rate,
         voiceId: voiceId ?? this.voiceId,
         largeText: largeText ?? this.largeText,
+        cameraBriefed: cameraBriefed ?? this.cameraBriefed,
+        focusHintSeen: focusHintSeen ?? this.focusHintSeen,
         ttsProxyUrl: ttsProxyUrl ?? this.ttsProxyUrl,
         ttsApiKey: ttsApiKey ?? this.ttsApiKey,
       );
@@ -91,6 +105,8 @@ class AppSettings {
         'rate': rate,
         'voiceId': voiceId,
         'largeText': largeText,
+        'cameraBriefed': cameraBriefed,
+        'focusHintSeen': focusHintSeen,
         'ttsProxyUrl': ttsProxyUrl,
         'ttsApiKey': ttsApiKey,
       };
@@ -104,6 +120,8 @@ class AppSettings {
         rate: (j['rate'] as num?)?.toDouble() ?? 1.0,
         voiceId: j['voiceId'] as String?,
         largeText: j['largeText'] as bool? ?? false,
+        cameraBriefed: j['cameraBriefed'] as bool? ?? false,
+        focusHintSeen: j['focusHintSeen'] as bool? ?? false,
         ttsProxyUrl: j['ttsProxyUrl'] as String?,
         ttsApiKey: j['ttsApiKey'] as String?,
       );
