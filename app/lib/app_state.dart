@@ -78,6 +78,14 @@ class AppState extends ChangeNotifier {
 
   List<StoredBook> _books = [];
   StoredBook? _active;
+
+  /// Buku yang sedang DIBACAKAN — beda dari [active], yang cuma menandai
+  /// layar mana yang sedang dibuka.
+  ///
+  /// Dulu keduanya satu, dan akibatnya keluar dari daftar bagian mematikan
+  /// suaranya di tengah kalimat. Itu justru skenario aslinya: memasukkan HP
+  /// ke saku lalu jalan. Yang berhenti seharusnya cuma layarnya.
+  StoredBook? _reading;
   AppSettings _settings = const AppSettings();
   bool _busy = false;
   String? _error;
@@ -105,6 +113,11 @@ class AppState extends ChangeNotifier {
 
   List<StoredBook> get books => List.unmodifiable(_books);
   StoredBook? get active => _active;
+
+  /// Buku yang suaranya sedang berjalan atau sedang dijeda di tengah jalan.
+  /// Ini yang dipakai mini player untuk tahu ada apa yang bisa dilanjutkan.
+  StoredBook? get reading =>
+      player.sentences.isEmpty ? null : _reading;
   AppSettings get settings => _settings;
   bool get busy => _busy;
   String? get error => _error;
@@ -441,9 +454,24 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Menutup LAYAR bukunya, bukan bacaannya. Suaranya lanjut, dan mini
+  /// player yang membawanya ke layar berikutnya.
   void closeBook() {
-    player.stop();
     _active = null;
+    notifyListeners();
+  }
+
+  /// Benar-benar berhenti: dipakai saat user menutup mini player.
+  void stopReading() {
+    player.stop();
+    _reading = null;
+    notifyListeners();
+  }
+
+  /// Membuka kembali buku yang sedang dibacakan — jalur "ketuk mini player".
+  void resumeReading() {
+    final b = _reading;
+    if (b != null) _active = b;
     notifyListeners();
   }
 
@@ -456,6 +484,7 @@ class AppState extends ChangeNotifier {
     if (!canOpen(b, index)) return;
     b.currentIndex = index;
     quotaJustRanOut = false;
+    _reading = b;
     player.load(b.segments[index].text);
     await store.save(_books);
     notifyListeners();
@@ -463,9 +492,12 @@ class AppState extends ChangeNotifier {
 
   Future<void> removeBook(StoredBook book) async {
     _books = _books.where((b) => b.id != book.id).toList();
-    if (_active?.id == book.id) {
+    if (_active?.id == book.id) _active = null;
+    // Buku yang dihapus tidak boleh terus terdengar, dan mini player-nya
+    // tidak boleh menunjuk ke sesuatu yang sudah tidak ada di rak.
+    if (_reading?.id == book.id) {
       player.stop();
-      _active = null;
+      _reading = null;
     }
     await store.save(_books);
     notifyListeners();
@@ -492,7 +524,9 @@ class AppState extends ChangeNotifier {
   }
 
   void _onPlayerChanged() {
-    final b = _active;
+    // Sengaja `_reading`, bukan `_active`: progres dan layanan latar depan
+    // harus tetap terurus walau layar bukunya sudah ditutup.
+    final b = _reading;
     if (b == null) return;
     _syncKeepAwake(b);
     if (player.status == PlayerStatus.playing) {

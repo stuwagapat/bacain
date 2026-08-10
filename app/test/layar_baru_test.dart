@@ -15,6 +15,7 @@ import 'package:bacain/core/store/library_store.dart';
 import 'package:bacain/core/store/settings_store.dart';
 import 'package:bacain/core/tts/segment_player.dart';
 import 'package:bacain/core/tts/speech_engine.dart';
+import 'package:bacain/screens/library.dart';
 import 'package:bacain/screens/player.dart';
 import 'package:bacain/screens/scan_intro.dart';
 import 'package:bacain/screens/scan_tray.dart';
@@ -250,6 +251,93 @@ void main() {
       await t.pump();
 
       expect(find.byKey(const Key('focus-hint')), findsNothing);
+    });
+  });
+
+  group('mini player', () {
+    testWidgets('keluar dari daftar bagian TIDAK mematikan suaranya',
+        (t) async {
+      final state = buatState();
+      await bukaBagian(state);
+      state.player.play();
+      await t.pump();
+
+      expect(state.player.sentences, isNotEmpty);
+      // Dulu closeBook memanggil player.stop(), jadi menekan tombol kembali
+      // memutus bacaan di tengah kalimat — persis di skenario yang jadi
+      // alasan produk ini ada: HP masuk saku, lalu jalan.
+      state.closeBook();
+      await t.pump();
+
+      expect(state.active, isNull, reason: 'layarnya memang ditutup');
+      expect(state.reading, isNotNull, reason: 'tapi bacaannya tidak');
+      expect(state.player.sentences, isNotEmpty);
+    });
+
+    testWidgets('muncul di rak saat ada yang sedang dibacakan', (t) async {
+      final state = buatState();
+      await bukaBagian(state);
+      state.closeBook();
+
+      await t.pumpWidget(bungkus(
+          LibraryPage(state: state, onOpen: (_) {})));
+      await t.pump();
+
+      expect(find.byKey(const Key('mini-player')), findsOneWidget);
+    });
+
+    testWidgets('tidak muncul sama sekali kalau tidak ada yang dibacakan',
+        (t) async {
+      final state = buatState();
+      await state.init();
+
+      await t.pumpWidget(bungkus(
+          LibraryPage(state: state, onOpen: (_) {})));
+      await t.pump();
+
+      expect(find.byKey(const Key('mini-player')), findsNothing);
+    });
+
+    testWidgets('tingginya persis jatah yang disisakan tiap layar', (t) async {
+      final state = buatState();
+      await bukaBagian(state);
+      state.closeBook();
+
+      await t.pumpWidget(bungkus(
+          LibraryPage(state: state, onOpen: (_) {})));
+      await t.pump();
+
+      final kotak = t.getSize(find.byKey(const Key('mini-player')));
+      expect(kotak.height, AppSize.miniPlayer);
+    });
+
+    testWidgets('tombol tutup benar-benar menghentikan, bukan menyembunyikan',
+        (t) async {
+      final state = buatState();
+      await bukaBagian(state);
+      state.player.play();
+      state.closeBook();
+
+      await t.pumpWidget(bungkus(
+          LibraryPage(state: state, onOpen: (_) {})));
+      await t.pump();
+
+      await t.tap(find.byKey(const Key('mini-stop')));
+      await t.pumpAndSettle();
+
+      expect(state.reading, isNull);
+      expect(find.byKey(const Key('mini-player')), findsNothing);
+    });
+
+    testWidgets('menghapus buku yang sedang dibacakan ikut menghentikannya',
+        (t) async {
+      final state = buatState();
+      await bukaBagian(state);
+      final book = state.active!;
+      state.closeBook();
+
+      await state.removeBook(book);
+      expect(state.reading, isNull);
     });
   });
 }

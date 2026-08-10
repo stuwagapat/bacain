@@ -7,6 +7,7 @@ import '../core/scan/page_scanner.dart';
 import '../core/store/library_store.dart';
 import '../ui/tokens.dart';
 import 'confirm_book.dart';
+import 'mini_player.dart';
 import 'review_scan.dart';
 import 'scan_intro.dart';
 import 'scan_tray.dart';
@@ -140,6 +141,7 @@ class LibraryPage extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: MiniPlayer(state: state),
       body: state.busy
           ? const Center(child: CircularProgressIndicator())
           : ListView(

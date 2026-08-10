@@ -504,6 +504,11 @@ sama persis dengan w400.
   yang tidak pernah dikunci — dijaga uji.
 - **Recap** dengan dua label wajibnya dan indikator "Sedang dibacakan".
 - **Pil hint** `Ketuk teks untuk mode fokus`, sekali tampil, tersimpan.
+- **Mini player 64 dp** di rak dan daftar bagian. Yang penting bukan barisnya,
+  tapi perubahan di belakangnya: `closeBook()` dulu memanggil `player.stop()`,
+  jadi menekan tombol kembali memutus bacaan di tengah kalimat — persis di
+  skenario yang jadi alasan produk ini ada. Sekarang "buku yang dibacakan"
+  (`reading`) terpisah dari "layar buku yang dibuka" (`active`).
 - **Kata yang diragukan OCR** ditandai `statusWarning` bergaris titik, langsung
   di dalam kotak isian. Sumber keraguan: skor ML Kit kalau ada, kalau tidak
   bentuk katanya sendiri (`core/scan/ocr_doubt.dart`, 18 uji).
@@ -513,7 +518,6 @@ sama persis dengan w400.
 - `readingHighlightBg` **belum diuji di layar HP dalam gelap** — baru di
   monitor. Yang lembut di monitor bisa menyilaukan di kamar.
 - Mode terang belum ditata di layar mana pun.
-- Mini player 64 dp belum ada di layar utama.
 - Ringkasan recap masih kalimat asli bagian sebelumnya, bukan ringkasan AI.
 
 

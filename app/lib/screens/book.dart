@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../ui/tokens.dart';
+import 'mini_player.dart';
 import 'player.dart';
 
 /// Daftar bagian. Bagian yang belum terbuka sengaja tetap terlihat — user
@@ -20,8 +21,9 @@ class BookPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: state.closeBook,
         ),
-        title: Text(book.title, style: const TextStyle(fontSize: 17)),
+        title: Text(book.title, style: AppType.uiTitleSmall),
       ),
+      bottomNavigationBar: MiniPlayer(state: state),
       body: Column(
         children: [
           Padding(
