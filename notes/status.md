@@ -515,3 +515,24 @@ sama persis dengan w400.
 - Mode terang belum ditata di layar mana pun.
 - Mini player 64 dp belum ada di layar utama.
 - Ringkasan recap masih kalimat asli bagian sebelumnya, bukan ringkasan AI.
+
+
+## Menyajikan prototipe web
+
+`bash tools/bangun-web.sh` — bukan `flutter build web` langsung. Dua hal yang
+tidak dilakukan perintah bawaannya, dan dua-duanya baru ketahuan saat gagal:
+
+1. **`--base-href` bawaannya mutlak.** Nilai `/bacain/` cuma jalan di GitHub
+   Pages; di Vercel yang menyajikan dari akar, seluruh aset 404 dan yang
+   terlihat cuma layar putih. Skrip itu menulis ulang jadi `<base href="./">`,
+   yang jalan di dua-duanya — aman karena app ini tidak punya rute URL sendiri.
+2. **Tanpa `--no-web-resources-cdn`**, CanvasKit diambil dari gstatic saat
+   dijalankan. Di jaringan yang memblokirnya, app-nya diam saja tanpa pesan.
+
+`vercel.json` sudah ada di akar repo: tanpa langkah build, keluaran dari
+`docs/`, dan semua jalur dialihkan ke `index.html`. Vercel menyajikan berkas
+yang benar-benar ada lebih dulu, jadi pengalihan itu tidak mengganggu aset.
+
+Sisa satu permintaan keluar ke `fonts.gstatic.com` untuk Roboto — font
+cadangan bawaan Flutter, bukan yang dipakai app. Tidak fatal; app tetap jalan
+kalau diblokir.
