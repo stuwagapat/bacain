@@ -233,6 +233,78 @@ body {
 .opt-d { margin: 0; font-size: 12.5px; color: var(--text-faint); }
 .opt-soon { opacity: .45; }
 
+/* ---------- kamera scan (dibangun sendiri, bukan UI bawaan ML Kit) ---------- */
+
+.cam { flex: 1; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.cam-view { position: absolute; inset: 0; background: radial-gradient(115% 78% at 50% 42%, #23261E 0%, #14170F 58%, #090B08 100%); }
+.cam-view-dim { background: radial-gradient(115% 78% at 50% 42%, #14160F 0%, #0C0E09 60%, #060704 100%); }
+
+/* halaman buku yang sedang dibidik */
+.cam-page {
+  position: absolute; left: 50%; top: 45%; width: 244px; height: 322px;
+  transform: translate(-50%, -50%) perspective(720px) rotateX(7deg) rotateZ(-1.3deg);
+  background: #CFCBC0; border-radius: 3px; padding: 26px 22px;
+  display: flex; flex-direction: column; gap: 8px; box-shadow: 0 26px 54px rgba(0,0,0,.6);
+}
+.cam-page-dim { background: #6E6B63; }
+.cam-page-skew { transform: translate(-50%, -50%) perspective(620px) rotateX(15deg) rotateZ(-7deg); }
+.cam-line { height: 5px; border-radius: 2px; background: #9A968B; }
+.cam-page-dim .cam-line { background: #4E4C46; }
+
+/* bingkai hasil deteksi tepi */
+.cam-quad {
+  position: absolute; left: 50%; top: 45%; width: 262px; height: 340px;
+  transform: translate(-50%, -50%) perspective(720px) rotateX(7deg) rotateZ(-1.3deg);
+  border: 2px solid var(--accent); border-radius: 4px; transition: border-color .35s ease;
+}
+.cam-quad-skew { transform: translate(-50%, -50%) perspective(620px) rotateX(15deg) rotateZ(-7deg); border-color: var(--c-amber); }
+.cam-c { position: absolute; width: 18px; height: 18px; border: 3px solid var(--accent); }
+.cam-quad-skew .cam-c { border-color: var(--c-amber); }
+.cam-c-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+.cam-c-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 4px 0 0; }
+.cam-c-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 4px; }
+.cam-c-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+
+.cam-top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; color: var(--c-bone); flex: none; }
+.cam-top svg { width: 19px; height: 19px; display: block; }
+.cam-count { font-size: 12.5px; font-weight: 700; background: rgba(9,11,8,.62); padding: 7px 13px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; }
+
+.cam-chip {
+  position: relative; z-index: 2; margin: auto auto 0; display: flex; align-items: center; gap: 9px;
+  background: rgba(9,11,8,.74); color: var(--c-bone); font-size: 12.5px; font-weight: 600;
+  padding: 10px 15px; border-radius: var(--r-pill); flex: none;
+}
+.cam-chip svg { width: 14px; height: 14px; display: block; flex: none; }
+.cam-chip-warn { color: var(--c-amber); }
+
+.cam-bottom { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 18px 24px; flex: none; }
+
+.cam-strip { display: flex; width: 72px; flex: none; }
+.cam-th {
+  width: 34px; height: 44px; border-radius: 5px; background: #CFCBC0;
+  border: 1.5px solid rgba(9,11,8,.55); box-shadow: -3px 0 6px rgba(0,0,0,.45);
+  margin-left: -15px; padding: 6px 5px; display: flex; flex-direction: column; gap: 3px;
+}
+.cam-th:first-child { margin-left: 0; }
+.cam-th span { height: 2.5px; border-radius: 1px; background: #9A968B; }
+
+.cam-shutter { width: 66px; height: 66px; border-radius: var(--r-pill); border: 3px solid var(--accent); display: grid; place-items: center; flex: none; transition: border-color .35s ease; }
+.cam-shutter i { width: 50px; height: 50px; border-radius: var(--r-pill); background: var(--c-bone); display: block; }
+/* potret otomatis mati — cincin meredup, tapi tombolnya tetap penuh dan bisa ditekan */
+.cam-shutter-warn { border-color: rgba(239,234,218,.5); }
+
+.cam-done { font-size: 13.5px; font-weight: 700; color: var(--c-bone); background: rgba(9,11,8,.62); padding: 10px 15px; border-radius: var(--r-pill); width: 72px; text-align: center; flex: none; font-variant-numeric: tabular-nums; }
+
+/* nampan halaman terkumpul */
+.tray-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; flex: none; }
+.tray-item { position: relative; aspect-ratio: 3 / 4; border-radius: 9px; background: #CFCBC0; padding: 9px 8px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.tray-item .cam-line { height: 3.5px; }
+.tray-n { position: absolute; left: 5px; bottom: 5px; font-size: 9.5px; font-weight: 800; color: var(--ink); background: rgba(239,234,218,.88); border-radius: 4px; padding: 1px 5px; font-variant-numeric: tabular-nums; }
+.tray-flag { position: absolute; right: 5px; top: 5px; width: 15px; height: 15px; border-radius: var(--r-pill); background: var(--c-amber); display: grid; place-items: center; color: var(--ink); }
+.tray-flag svg { width: 9px; height: 9px; display: block; }
+.tray-add { border: 1px dashed var(--line); background: none; display: grid; place-items: center; color: var(--text-muted); }
+.tray-add svg { width: 18px; height: 18px; display: block; }
+
 /* ---------- tinjau scan ---------- */
 
 .pager { display: flex; align-items: center; gap: 10px; flex: none; color: var(--text-faint); }
@@ -572,11 +644,11 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             <div class="stack" style="padding-bottom:24px;">
               <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto buku fisik</span>
               <span class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>Ambil file PDF atau EPUB</span>
-              <p class="handoff">Keduanya membuka tampilan bawaan HP.<br>Setelah selesai, kamu kembali ke sini.</p>
+              <p class="handoff">Memotret pakai kamera Bacain sendiri.<br>Hanya "ambil file" yang membuka file manager HP.</p>
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa". <strong style="color:var(--text)">Baru:</strong> baris di bawah tombol menyiapkan user sebelum layar berpindah ke kamera atau file picker bawaan HP.</p>
+        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa". Baris di bawahnya kini hanya menyiapkan satu perpindahan yang tersisa: file manager.</p>
       </div>
 
       <!-- 5 · Beranda terisi -->
@@ -710,7 +782,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
     <div class="flow-head">
       <span class="flow-n">Alur 03</span>
       <h2>Menambah buku</h2>
-      <p>Layar kamera dan file picker tidak didesain — keduanya disediakan sistem (ML Kit Document Scanner dan picker Android).</p>
+      <p>Kamera sekarang didesain sendiri, tidak lagi memakai tampilan bawaan ML Kit — ongkosnya dijabarkan di kaki papan. Hanya file picker yang masih milik Android.</p>
     </div>
     <div class="rack">
 
@@ -749,10 +821,152 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
               <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
               <span><p class="opt-t">Cerita rakyat</p><p class="opt-d">Gratis · menyusul</p></span>
             </div>
-            <p class="handoff">Dua pilihan pertama membuka tampilan bawaan HP.</p>
+            <p class="handoff">Hanya "ambil dari file" yang membuka file manager HP.</p>
           </div>
         </div></div>
         <p class="stage-note">Beranda meredup di belakang, tidak hilang — user tetap tahu ia sedang di atas rak, bukan pindah layar.</p>
+      </div>
+
+      <!-- 4b · Siap memotret -->
+      <div class="stage">
+        <div class="stage-cap"><h3>4b · Siap memotret</h3><span>Muncul sekali</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+            <div class="spacer"></div>
+            <h2 class="h-display">Foto halamannya satu per satu.</h2>
+            <p class="h-sub">Tidak perlu buru-buru — kamu bisa berhenti dan lanjut lagi kapan saja.</p>
+            <div class="how" style="padding-top:28px;">
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-pistachio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 20h18"/></svg></span>
+                <span><p class="how-t">Letakkan di permukaan datar</p><p class="how-d">Meja atau lantai. Buku yang dipegang cenderung goyang.</p></span>
+              </div>
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-lavender)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span>
+                <span><p class="how-t">Pastikan seluruh halaman masuk</p><p class="how-d">Bingkai akan menyala saat halaman terbaca penuh.</p></span>
+              </div>
+              <div class="how-row">
+                <span class="how-icon" style="background:var(--c-sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M2 12h4M18 12h4M4.9 19.1l2.9-2.9M16.2 7.8l2.9-2.9"/></svg></span>
+                <span><p class="how-t">Kami potret otomatis</p><p class="how-d">Begitu gambarnya diam sebentar. Tombolnya tetap ada kalau mau manual.</p></span>
+              </div>
+            </div>
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:14px;">
+              <span class="btn btn-primary">Mulai memotret</span>
+              <span class="btn-ghost">Nanti saja</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Inilah pengganti sebenarnya dari baris microcopy kemarin: layar penyiap yang punya bahasa visual Bacain, bukan peringatan bahwa user akan dilempar keluar.</p>
+      </div>
+
+      <!-- 4c · Kamera membidik -->
+      <div class="stage">
+        <div class="stage-cap"><h3>4c · Kamera — halaman terbaca</h3><span>Potret otomatis</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="cam">
+            <div class="cam-view"></div>
+            <div class="cam-page">
+              <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
+              <span class="cam-line" style="width:64%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line" style="width:44%"></span>
+            </div>
+            <div class="cam-quad">
+              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
+              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
+            </div>
+            <div class="cam-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span class="cam-count">3 halaman</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+            </div>
+            <div class="cam-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+              Halaman terbaca — tahan sebentar
+            </div>
+            <div class="cam-bottom">
+              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
+              <span class="cam-shutter"><i></i></span>
+              <span class="cam-done">Selesai</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Bingkai menyala aksen begitu keempat sudut terbaca. Tumpukan kiri menunjukkan halaman yang sudah masuk — bukti visual bahwa jepretan tadi tidak hilang.</p>
+      </div>
+
+      <!-- 4d · Kamera perlu dibetulkan -->
+      <div class="stage">
+        <div class="stage-cap"><h3>4d · Kamera — perlu dibetulkan</h3><span>Kondisi buruk</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="cam">
+            <div class="cam-view cam-view-dim"></div>
+            <div class="cam-page cam-page-dim cam-page-skew">
+              <span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:78%"></span>
+              <span class="cam-line" style="margin-top:9px"></span><span class="cam-line"></span><span class="cam-line"></span>
+              <span class="cam-line" style="width:64%"></span>
+            </div>
+            <div class="cam-quad cam-quad-skew">
+              <span class="cam-c cam-c-tl"></span><span class="cam-c cam-c-tr"></span>
+              <span class="cam-c cam-c-bl"></span><span class="cam-c cam-c-br"></span>
+            </div>
+            <div class="cam-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span class="cam-count">3 halaman</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+            </div>
+            <div class="cam-chip cam-chip-warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              Kurang cahaya dan agak miring
+            </div>
+            <div class="cam-bottom">
+              <span class="cam-strip"><span class="cam-th"><span></span><span></span><span style="width:60%"></span></span><span class="cam-th"><span></span><span></span><span style="width:70%"></span></span><span class="cam-th"><span></span><span></span><span style="width:55%"></span></span></span>
+              <span class="cam-shutter cam-shutter-warn"><i></i></span>
+              <span class="cam-done">Selesai</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Potret otomatis berhenti, tapi tombolnya <strong style="color:var(--text)">tidak pernah dikunci</strong> — user tetap boleh memaksa. App yang menolak memotret lebih menyebalkan daripada hasil scan yang agak miring.</p>
+      </div>
+
+      <!-- 4e · Halaman terkumpul -->
+      <div class="stage">
+        <div class="stage-cap"><h3>4e · Halaman terkumpul</h3><span>Sebelum diproses</span></div>
+        <div class="phone-wrap"><div class="phone">
+          <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
+          <div class="screen">
+            <div class="topbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <span class="topbar-title">12 halaman</span>
+              <span class="topbar-aside">Bab 4</span>
+            </div>
+            <div class="tray-grid">
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:60%"></span><span class="tray-n">1</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:72%"></span><span class="tray-n">2</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:55%"></span><span class="tray-n">3</span>
+                <span class="tray-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 8v5M12 17h.01"/></svg></span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:68%"></span><span class="tray-n">4</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:50%"></span><span class="tray-n">5</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:76%"></span><span class="tray-n">6</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:62%"></span><span class="tray-n">7</span></span>
+              <span class="tray-item"><span class="cam-line"></span><span class="cam-line"></span><span class="cam-line" style="width:58%"></span><span class="tray-n">8</span></span>
+              <span class="tray-item tray-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span>
+            </div>
+            <div class="warn" style="padding-top:16px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              Halaman 3 agak buram — ketuk untuk foto ulang
+            </div>
+            <p class="stage-note" style="padding-top:14px;">Tekan lama untuk mengubah urutan.</p>
+            <div class="spacer"></div>
+            <div class="stack" style="padding-bottom:20px;">
+              <span class="btn btn-primary">Proses 12 halaman</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="stage-note">Halaman buram ditandai sebelum OCR jalan, bukan sesudah. Memfoto ulang sekarang jauh lebih murah daripada membetulkan teks kacau di layar berikutnya.</p>
       </div>
 
       <!-- 8 · Tinjau scan -->
@@ -1055,6 +1269,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
     </div>
     <div>
       <h4>Yang perlu kamu putuskan</h4>
+      <p><strong>Kamera sendiri menggantikan ML Kit Document Scanner.</strong> Empat layar kamera di atas hanya bisa dibangun kalau scanner bawaan dilepas. Yang ikut hilang dan harus ditulis ulang di atas CameraX: deteksi tepi realtime, koreksi perspektif, dan pengelolaan batch. Perkiraan tambahan 1–2 minggu kerja, plus risiko kualitas crop yang lebih rendah dari milik Google di HP kelas bawah. Yang didapat: alur scan tidak lagi terasa keluar dari app, dan kondisi buruk bisa dipandu dengan bahasa sendiri. Kalau ongkosnya terlalu besar untuk fase validasi, layar <strong>4b</strong> dan <strong>4e</strong> tetap bisa dipakai mengapit scanner bawaan — itu menyerap sebagian besar kebingungannya dengan kerja jauh lebih sedikit.</p>
       <p><strong>"Bab 4 sudah menunggu."</strong> Notifikasi harian membalik logika tsundoku: dulu tumpukan buku menunggu sambil menuduh, sekarang satu bab menunggu sambil mengajak. Kalau mau yang lebih datar: "Bab 4 sudah siap."</p>
       <p><strong>Amber dan Olive masih keluarga kuning keemasan.</strong> Saya baca "kurangi kuning" sebagai membuang kuning listrik <code>#EDE300</code> saja. Kalau maksudmu seluruh keluarga kuning, bilang — tinggal ganti dua nilai itu.</p>
       <p><strong>Mode terang belum ada.</strong> Empat belas layar ini semuanya versi gelap, dan mode terang bukan sekadar pembalikan warna.</p>
