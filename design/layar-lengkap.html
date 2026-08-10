@@ -192,6 +192,9 @@ body {
 .orn-art { width: 240px; aspect-ratio: 853 / 322; background: var(--img-orn) center/contain no-repeat; margin: 0 auto; flex: none; }
 .orn-art-ink { background-image: var(--img-ornk); }
 
+/* menyiapkan user sebelum lompat ke layar bawaan sistem */
+.handoff { margin: 0; padding-top: 13px; text-align: center; font-size: 12px; line-height: 1.45; color: var(--text-faint); flex: none; }
+
 /* ---------- onboarding: cara kerja ---------- */
 
 .how { display: flex; flex-direction: column; gap: 18px; flex: none; }
@@ -294,20 +297,31 @@ body {
 
 .recap-body { font-family: var(--f-read); font-size: 18px; line-height: 1.68; color: var(--text); text-align: center; max-width: 27ch; margin: 0 auto; }
 
-.eq { display: flex; align-items: flex-end; justify-content: center; gap: 4px; height: 26px; padding: 26px 0; flex: none; }
-.eq i { width: 3px; border-radius: 2px; background: var(--accent); transition: background .35s ease; animation: eq 1.1s ease-in-out infinite; }
-.eq i:nth-child(1) { height: 30%; animation-delay: 0s; }
-.eq i:nth-child(2) { height: 70%; animation-delay: .16s; }
-.eq i:nth-child(3) { height: 100%; animation-delay: .32s; }
-.eq i:nth-child(4) { height: 55%; animation-delay: .48s; }
-.eq i:nth-child(5) { height: 25%; animation-delay: .64s; }
+/* menjelaskan kenapa layar ini muncul, dan kenapa ada suara */
+.why { margin: 0 0 14px; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-faint); flex: none; }
+.eq-cap { margin: 0; text-align: center; font-size: 11.5px; color: var(--text-faint); flex: none; }
+
+/* tinggi batang dalam px — persen + padding di border-box bikin tingginya nol */
+.eq { display: flex; align-items: flex-end; justify-content: center; gap: 4px; padding: 26px 0 12px; flex: none; }
+.eq i { width: 3px; border-radius: 2px; background: var(--accent); transform-origin: bottom; transition: background .35s ease; animation: eq 1.1s ease-in-out infinite; }
+.eq i:nth-child(1) { height: 8px;  animation-delay: 0s; }
+.eq i:nth-child(2) { height: 18px; animation-delay: .16s; }
+.eq i:nth-child(3) { height: 26px; animation-delay: .32s; }
+.eq i:nth-child(4) { height: 14px; animation-delay: .48s; }
+.eq i:nth-child(5) { height: 7px;  animation-delay: .64s; }
 @keyframes eq { 0%, 100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
 
 /* ---------- player ---------- */
 
-.player-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0 4px; flex: none; color: var(--text-muted); }
+.player-bar { display: flex; align-items: center; gap: 12px; padding: 6px 0 4px; flex: none; color: var(--text-muted); }
 .player-bar svg { width: 17px; height: 17px; display: block; }
-.player-chap { font-size: 11px; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; color: var(--text-faint); }
+.player-chap { flex: 1; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; color: var(--text-faint); }
+.pb-side { display: flex; align-items: center; gap: 16px; min-width: 50px; flex: none; }
+.pb-right { justify-content: flex-end; }
+
+/* mode fokus dulu hanya gestur tersembunyi — sekarang punya tombol */
+.hint-once { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 12px auto 0; padding: 8px 14px; border-radius: var(--r-pill); background: var(--surface); font-size: 11.5px; color: var(--text-faint); flex: none; }
+.hint-once svg { width: 12px; height: 12px; display: block; flex: none; }
 .player-title { margin: 0; padding: 6px 0 18px; font-family: var(--f-display); font-size: 25px; font-weight: 400; color: var(--text); flex: none; text-wrap: balance; }
 
 .reader { flex: 1; min-height: 0; overflow: hidden; font-family: var(--f-read); font-size: 17px; line-height: 1.68; display: flex; flex-direction: column; gap: 13px; }
@@ -345,6 +359,7 @@ body {
 .focus-transport .fp svg { width: 26px; height: 26px; }
 .focus-scrub { height: 2px; background: #23271F; border-radius: var(--r-pill); position: relative; }
 .focus-scrub i { position: absolute; inset: 0 auto 0 0; width: 44%; background: #4B514A; border-radius: var(--r-pill); }
+.focus-exit { margin: 0; padding: 16px 0 6px; text-align: center; font-size: 11px; color: #3F453E; }
 
 /* ---------- jatah habis ---------- */
 
@@ -557,10 +572,11 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             <div class="stack" style="padding-bottom:24px;">
               <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto buku fisik</span>
               <span class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>Ambil file PDF atau EPUB</span>
+              <p class="handoff">Keduanya membuka tampilan bawaan HP.<br>Setelah selesai, kamu kembali ke sini.</p>
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa".</p>
+        <p class="stage-note">Tanpa buku, rak jadi bidang kosong. Ornamen mengisinya tanpa berpura-pura ada isi — dan dua tombol menghilangkan pertanyaan "sekarang apa". <strong style="color:var(--text)">Baru:</strong> baris di bawah tombol menyiapkan user sebelum layar berpindah ke kamera atau file picker bawaan HP.</p>
       </div>
 
       <!-- 5 · Beranda terisi -->
@@ -733,6 +749,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
               <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
               <span><p class="opt-t">Cerita rakyat</p><p class="opt-d">Gratis · menyusul</p></span>
             </div>
+            <p class="handoff">Dua pilihan pertama membuka tampilan bawaan HP.</p>
           </div>
         </div></div>
         <p class="stage-note">Beranda meredup di belakang, tidak hilang — user tetap tahu ia sedang di atas rak, bukan pindah layar.</p>
@@ -852,9 +869,11 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
           <div class="screen">
             <div class="topbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
             <div class="spacer"></div>
+            <p class="why">Terakhir kamu dengar 2 hari lalu</p>
             <h2 class="h-display" style="text-align:center;font-size:27px;color:var(--text-muted);">Sebelumnya…</h2>
             <p class="recap-body" style="padding-top:24px;">Di bab lalu, penulis memperkenalkan gagasan bahwa sebagian hal ada di bawah kendali kita, sebagian lagi tidak.</p>
             <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
+            <p class="eq-cap">Sedang dibacakan</p>
             <div class="spacer"></div>
             <div class="stack" style="padding-bottom:14px;">
               <span class="btn btn-primary">Lanjut ke Bab 4</span>
@@ -862,7 +881,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             </div>
           </div>
         </div></div>
-        <p class="stage-note">Teksnya langsung disuarakan begitu layar terbuka — indikator lima batang itu menjelaskan kenapa ada suara tanpa perlu tombol putar.</p>
+        <p class="stage-note"><strong style="color:var(--text)">Baru:</strong> label di atas judul menjawab "kenapa layar ini muncul", dan "Sedang dibacakan" menjawab "kenapa tiba-tiba ada suara". Keduanya masalah yang cuma dialami user hari kedua — persis saat tidak ada yang menjelaskan.</p>
       </div>
 
       <!-- 11 · Player -->
@@ -872,9 +891,12 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
           <div class="statusbar"><span>09.41</span><span>▲ ▮</span></div>
           <div class="screen">
             <div class="player-bar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              <span class="pb-side"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
               <span class="player-chap">Bab 4</span>
-              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+              <span class="pb-side pb-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+              </span>
             </div>
             <h3 class="player-title">Dikotomi Kendali</h3>
             <div class="reader">
@@ -883,6 +905,10 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
               <p class="ln-future">Kegelisahan lahir ketika kita mencoba mengendalikan yang bukan urusan kita.</p>
               <p class="ln-future">Yang bisa kita atur hanyalah penilaian dan tindakan sendiri.</p>
             </div>
+            <p class="hint-once">
+              Ketuk teks untuk mode fokus
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </p>
             <div class="scrub">
               <div class="scrub-track"><span class="scrub-fill"></span><span class="scrub-knob"></span></div>
               <div class="scrub-times"><span>6:12</span><span>14:03</span></div>
@@ -895,7 +921,7 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
             <div class="player-foot"><span><b>1.0×</b></span><span>Suara <b>Ayu</b></span><span>sisa <b>18m</b></span></div>
           </div>
         </div></div>
-        <p class="stage-note">Area teks mengambil porsi terbesar — inilah yang membedakan Bacain dari pemutar audio biasa. Kalimat aktif ditandai bilah aksen plus latar redup.</p>
+        <p class="stage-note">Area teks mengambil porsi terbesar — inilah yang membedakan Bacain dari pemutar audio biasa. <strong style="color:var(--text)">Baru:</strong> ikon di kanan atas membuka mode fokus secara permanen, dan pil hint di bawah teks muncul sekali saja di pemutaran pertama lalu bisa ditutup.</p>
       </div>
 
       <!-- 12 · Mode fokus -->
@@ -916,10 +942,11 @@ code { font-family: var(--f-mono); font-size: 12px; color: var(--text); backgrou
               <span class="fp"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
             </div>
-            <div class="focus-scrub" style="margin-bottom:30px;"><i></i></div>
+            <div class="focus-scrub"><i></i></div>
+            <p class="focus-exit">Ketuk di mana saja untuk kembali</p>
           </div>
         </div></div>
-        <p class="stage-note">Aksen sengaja dicabut sepenuhnya di sini. Untuk dipakai di jalan atau saat mata istirahat, layar harus berhenti menarik perhatian.</p>
+        <p class="stage-note">Aksen sengaja dicabut sepenuhnya di sini. Untuk dipakai di jalan atau saat mata istirahat, layar harus berhenti menarik perhatian. <strong style="color:var(--text)">Baru:</strong> baris keluar di paling bawah — tanpa itu, user yang tidak sengaja masuk tidak punya jalan pulang yang terlihat.</p>
       </div>
 
       <!-- 13 · Jatah habis -->
