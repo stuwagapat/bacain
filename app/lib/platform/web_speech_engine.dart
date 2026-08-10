@@ -22,6 +22,7 @@ class WebSpeechEngine implements SpeechEngine {
 
   Completer<void>? _pending;
   web.SpeechSynthesisUtterance? _utterance;
+  Timer? _guard;
   var _stopping = false;
 
   @override
@@ -96,16 +97,42 @@ class WebSpeechEngine implements SpeechEngine {
 
     // Jaring pengaman: kalau browser menelan `onend` (pernah terjadi di
     // Chrome saat tab tidak aktif), ucapan tidak boleh menggantung selamanya.
-    final guardMs = (trimmed.length * 90 / rate).clamp(4000, 60000).toInt();
-    Timer(Duration(milliseconds: guardMs), () {
-      if (identical(_pending, completer) && !completer.isCompleted) _finish();
-    });
+    _armGuard(completer, (trimmed.length * 90 / rate).clamp(4000, 60000).toInt());
 
     _synth.speak(u);
     return completer.future;
   }
 
+  /// Penjaga waktu yang MENUNGGU, bukan menyalip.
+  ///
+  /// Versi sebelumnya menyelesaikan ucapan begitu perkiraan durasinya lewat,
+  /// tanpa memeriksa apakah suaranya benar-benar sudah habis. Perkiraan itu
+  /// tidak mungkin selalu tepat, dan tiap kali ia kecepatan akibatnya bukan
+  /// sekali meleset lalu pulih:
+  ///
+  ///   1. pemutar maju ke kalimat berikutnya — teks mendahului suara;
+  ///   2. `speak()` berikutnya masuk ANTREAN di belakang ucapan yang masih
+  ///      berjalan, bukan menggantikannya;
+  ///   3. selisihnya menumpuk di tiap kalimat sesudahnya.
+  ///
+  /// Jadi selama mesinnya masih berbunyi, penjaga ini memasang ulang dirinya.
+  /// Asimetrinya disengaja: penjaga yang kecepatan merusak diam-diam, penjaga
+  /// yang kelambatan cuma jadi jeda yang terlihat dan bisa ditekan ulang.
+  void _armGuard(Completer<void> completer, int ms, {int sisaPercobaan = 60}) {
+    _guard?.cancel();
+    _guard = Timer(Duration(milliseconds: ms), () {
+      if (!identical(_pending, completer) || completer.isCompleted) return;
+      if ((_synth.speaking || _synth.pending) && sisaPercobaan > 0) {
+        _armGuard(completer, 1000, sisaPercobaan: sisaPercobaan - 1);
+        return;
+      }
+      _finish();
+    });
+  }
+
   void _finish() {
+    _guard?.cancel();
+    _guard = null;
     final c = _pending;
     _pending = null;
     _utterance = null;

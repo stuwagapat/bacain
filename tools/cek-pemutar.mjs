@@ -43,7 +43,7 @@ const mock = () => {
 };
 
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-const page = await b.newPage();
+const page = await b.newPage({ viewport: { width: 390, height: 844 } });
 page.on('pageerror', e => console.log('  ! pageerror:', String(e).slice(0, 200)));
 await page.addInitScript(mock);
 await page.goto(URL, { waitUntil: 'networkidle' });
@@ -58,6 +58,16 @@ const tap = async (label, { exact = false } = {}) => {
   await el.waitFor({ timeout: 8000 });
   await el.click({ force: true });
   await page.waitForTimeout(700);
+};
+
+/// Tombol putar/jeda dicari lewat nama aksesibilitasnya. Koordinat piksel
+/// dulu dipakai di sini, dan begitu app dibingkai selebar HP di jendela lebar,
+/// klik-nya jatuh ke luar app — kegagalan alat yang menyamar jadi kegagalan
+/// produk.
+const tekanPutar = async () => {
+  const b = page.getByLabel(/^(Putar|Jeda)$/).last();
+  await b.waitFor({ timeout: 8000 });
+  await b.click({ force: true });
 };
 
 const shot = async n => page.screenshot({ path: `/tmp/claude-0/-home-user-bacain/4b328dfe-174d-5ea1-ac16-6a2dc5f31004/scratchpad/${n}.png` });
@@ -98,23 +108,21 @@ try {
   const dump = async () => page.evaluate(() => window.__tts);
   const reset = async () => page.evaluate(() => { window.__tts.spoken.length = 0; window.__tts.events.length = 0; });
 
-  const PUTAR = [640, 666];
-
   // 1. Putar
-  await page.mouse.click(...PUTAR);
+  await tekanPutar();
   await page.waitForTimeout(1200);
   const a = await dump();
   console.log('PUTAR  spoken=' + a.spoken.length + '  events=' + JSON.stringify(a.events.slice(0, 4)));
   if (a.spoken.length === 0) throw new Error('tombol putar tidak membacakan apa pun');
 
   // 2. Jeda — di sinilah Chrome menyisakan keadaan paused
-  await page.mouse.click(...PUTAR);
+  await tekanPutar();
   await page.waitForTimeout(700);
   console.log('JEDA   events=' + JSON.stringify((await dump()).events.slice(-3)));
 
   // 3. KETUK KALIMAT — jalur yang dilaporkan rusak
   await reset();
-  await page.mouse.click(400, 336);
+  await page.getByText(/Sampulnya berdebu/).first().click({ force: true });
   await page.waitForTimeout(2000);
 
   const h = await dump();

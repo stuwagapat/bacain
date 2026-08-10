@@ -9,20 +9,21 @@ import '../ui/tokens.dart';
 /// untuk langsung ditolak di sana.
 Future<void> openListening(BuildContext context, AppState state) async {
   if (state.quotaExhausted && state.isNewContent) {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => QuotaExhaustedPage(state: state),
-    ));
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => QuotaExhaustedPage(state: state)));
     return;
   }
   if (state.needsRecap) {
-    final go = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => RecapPage(state: state),
-    ));
+    final go = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => RecapPage(state: state)));
     if (go != true || !context.mounted) return;
   }
   if (!context.mounted) return;
-  await Navigator.of(context)
-      .push(MaterialPageRoute(builder: (_) => PlayerPage(state: state)));
+  await Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (_) => PlayerPage(state: state)));
 }
 
 // ── ringkasan "sebelumnya" ─────────────────────────────────────────
@@ -56,17 +57,22 @@ class RecapPage extends StatelessWidget {
                   'TERAKHIR KAMU DENGAR ${state.jedaTerakhir!.toUpperCase()}',
                   key: const Key('recap-jeda'),
                   style: AppType.uiCaption.copyWith(
-                      fontSize: 11,
-                      letterSpacing: 1.4,
-                      fontWeight: FontWeight.w700,
-                      color: warna.textDisabled),
+                    fontSize: 11,
+                    letterSpacing: 1.4,
+                    fontWeight: FontWeight.w700,
+                    color: warna.textDisabled,
+                  ),
                 ),
               ),
             const SizedBox(height: 14),
             Center(
-              child: Text('Sebelumnya…',
-                  style: AppType.uiHeadline.copyWith(
-                      fontSize: 27, color: warna.textSecondary)),
+              child: Text(
+                'Sebelumnya…',
+                style: AppType.uiHeadline.copyWith(
+                  fontSize: 27,
+                  color: warna.textSecondary,
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -75,8 +81,9 @@ class RecapPage extends StatelessWidget {
                   state.recapText(),
                   key: const Key('recap-text'),
                   textAlign: TextAlign.center,
-                  style: AppType.readingRecap
-                      .copyWith(color: warna.readingTextActive),
+                  style: AppType.readingRecap.copyWith(
+                    color: warna.readingTextActive,
+                  ),
                 ),
               ),
             ),
@@ -86,10 +93,11 @@ class RecapPage extends StatelessWidget {
             const _IndikatorSuara(),
             const SizedBox(height: 6),
             Center(
-              child: Text('Sedang dibacakan',
-                  key: const Key('recap-dibacakan'),
-                  style: AppType.uiCaption
-                      .copyWith(color: warna.textDisabled)),
+              child: Text(
+                'Sedang dibacakan',
+                key: const Key('recap-dibacakan'),
+                style: AppType.uiCaption.copyWith(color: warna.textDisabled),
+              ),
             ),
             const SizedBox(height: 18),
             // Jujur soal apa yang belum ada: ini kalimat asli dari bagian
@@ -109,8 +117,10 @@ class RecapPage extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(true),
             ),
             Center(
-              child: QuietButton('Lewati',
-                  onPressed: () => Navigator.of(context).pop(true)),
+              child: QuietButton(
+                'Lewati',
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
             ),
           ],
         ),
@@ -151,34 +161,44 @@ class QuotaExhaustedPage extends StatelessWidget {
               const Spacer(),
               // Biarkan angkanya yang pamer. Tidak ada tanda seru di mana pun
               // di app ini; besarnya angka sudah cukup jadi perayaan.
-              Text('$menit',
-                  key: const Key('quota-menit'),
-                  textAlign: TextAlign.center,
-                  style: AppType.uiDisplay.copyWith(
-                      fontSize: 104, height: 0.9, color: tinta)),
+              Text(
+                '$menit',
+                key: const Key('quota-menit'),
+                textAlign: TextAlign.center,
+                style: AppType.uiDisplay.copyWith(
+                  fontSize: 104,
+                  height: 0.9,
+                  color: tinta,
+                ),
+              ),
               const SizedBox(height: 10),
-              Text('MENIT HARI INI',
-                  textAlign: TextAlign.center,
-                  style: AppType.uiCaption.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                      color: tinta.withValues(alpha: 0.56))),
+              Text(
+                'MENIT HARI INI',
+                textAlign: TextAlign.center,
+                style: AppType.uiCaption.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: tinta.withValues(alpha: 0.56),
+                ),
+              ),
               const SizedBox(height: 22),
-              Text('Cukup untuk hari ini. Lumayan, kan?',
-                  key: const Key('quota-title'),
-                  textAlign: TextAlign.center,
-                  style: AppType.uiHeadline
-                      .copyWith(fontSize: 26, color: tinta)),
+              Text(
+                'Cukup untuk hari ini. Lumayan, kan?',
+                key: const Key('quota-title'),
+                textAlign: TextAlign.center,
+                style: AppType.uiHeadline.copyWith(fontSize: 26, color: tinta),
+              ),
               const SizedBox(height: 11),
               Text(
                 'Bagian berikutnya kami siapkan untuk besok, jam '
                 '${state.settings.reminderLabel}. Sampai besok, ya.',
                 textAlign: TextAlign.center,
                 style: AppType.uiBody.copyWith(
-                    fontSize: 14,
-                    height: 1.55,
-                    color: tinta.withValues(alpha: 0.72)),
+                  fontSize: 14,
+                  height: 1.55,
+                  color: tinta.withValues(alpha: 0.72),
+                ),
               ),
               const Spacer(),
 
@@ -194,8 +214,10 @@ class QuotaExhaustedPage extends StatelessWidget {
                   minimumSize: const Size.fromHeight(52),
                   shape: const StadiumBorder(),
                 ),
-                child: Text('Dengar ulang bagian lama',
-                    style: AppType.uiLabel.copyWith(fontSize: 15.5)),
+                child: Text(
+                  'Dengar ulang bagian lama',
+                  style: AppType.uiLabel.copyWith(fontSize: 15.5),
+                ),
               ),
               TextButton(
                 key: const Key('quota-reset'),
@@ -204,9 +226,12 @@ class QuotaExhaustedPage extends StatelessWidget {
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                    foregroundColor: tinta.withValues(alpha: 0.62)),
-                child: Text('Kembalikan jatah (untuk uji coba)',
-                    style: AppType.uiLabel),
+                  foregroundColor: tinta.withValues(alpha: 0.62),
+                ),
+                child: Text(
+                  'Kembalikan jatah (untuk uji coba)',
+                  style: AppType.uiLabel,
+                ),
               ),
             ],
           ),
@@ -263,7 +288,9 @@ class _IndikatorSuaraState extends State<_IndikatorSuara>
               animation: _c,
               builder: (context, _) {
                 final fase = (_c.value + i * 0.16) % 1.0;
-                final skala = diam ? 1.0 : 0.45 + 0.55 * (1 - (fase - 0.5).abs() * 2);
+                final skala = diam
+                    ? 1.0
+                    : 0.45 + 0.55 * (1 - (fase - 0.5).abs() * 2);
                 return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   width: 3,
@@ -322,9 +349,11 @@ class _PlayerPageState extends State<PlayerPage> {
     _quotaShown = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => QuotaExhaustedPage(state: widget.state),
-      ));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => QuotaExhaustedPage(state: widget.state),
+        ),
+      );
     });
   }
 
@@ -335,10 +364,12 @@ class _PlayerPageState extends State<PlayerPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _activeKey.currentContext;
       if (ctx == null || !mounted) return;
-      Scrollable.ensureVisible(ctx,
-          alignment: 0.35,
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeOutCubic);
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.35,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
     });
   }
 
@@ -388,41 +419,46 @@ class _PlayerPageState extends State<PlayerPage> {
   /// Sesuatu yang dipakai di jalan atau saat mata istirahat harus berhenti
   /// menarik perhatian.
   Widget _focusView(SegmentPlayer player) => GestureDetector(
-        key: const Key('focus-view'),
-        onTap: () => setState(() => _focusMode = false),
-        child: Container(
-          color: warna.bgBase,
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(30, 60, 30, 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    key: const Key('focus-view'),
+    onTap: () => setState(() => _focusMode = false),
+    child: Container(
+      color: warna.bgBase,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(30, 60, 30, 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.state.active!.title.toUpperCase(),
+            style: AppType.uiCaption.copyWith(
+              fontSize: 11,
+              letterSpacing: 1.4,
+              color: warna.textDisabled,
+            ),
+          ),
+          Text(
+            player.current?.text ?? '',
+            style: AppType.readingBodyLarge.copyWith(
+              color: warna.readingTextActive,
+            ),
+          ),
+          Column(
             children: [
-              Text(widget.state.active!.title.toUpperCase(),
-                  style: AppType.uiCaption.copyWith(
-                      fontSize: 11,
-                      letterSpacing: 1.4,
-                      color: warna.textDisabled)),
+              _controls(player, fokus: true),
+              const SizedBox(height: 12),
+              // Jalan keluar harus terlihat. Tanpa baris ini, user yang
+              // tidak sengaja masuk akan terjebak di layar hampir kosong.
               Text(
-                player.current?.text ?? '',
-                style: AppType.readingBodyLarge
-                    .copyWith(color: warna.readingTextActive),
-              ),
-              Column(
-                children: [
-                  _controls(player, fokus: true),
-                  const SizedBox(height: 12),
-                  // Jalan keluar harus terlihat. Tanpa baris ini, user yang
-                  // tidak sengaja masuk akan terjebak di layar hampir kosong.
-                  Text('Ketuk di mana saja untuk kembali',
-                      style: AppType.uiCaption
-                          .copyWith(color: warna.textDisabled)),
-                ],
+                'Ketuk di mana saja untuk kembali',
+                style: AppType.uiCaption.copyWith(color: warna.textDisabled),
               ),
             ],
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   Widget _fullView(SegmentPlayer player, TextStyle gaya) {
     final sentences = player.sentences;
@@ -454,8 +490,10 @@ class _PlayerPageState extends State<PlayerPage> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   margin: const EdgeInsets.only(bottom: 2),
                   // Latar penanda saja, tanpa garis aksen: warna merek hanya
                   // untuk hal yang bisa ditekan, dan kalimat yang sedang
@@ -471,8 +509,8 @@ class _PlayerPageState extends State<PlayerPage> {
                       color: active
                           ? warna.readingTextActive
                           : (past
-                              ? warna.readingTextPast
-                              : warna.readingTextFuture),
+                                ? warna.readingTextPast
+                                : warna.readingTextFuture),
                       // Tebal huruf sengaja TIDAK berubah saat kalimat aktif.
                       // Huruf tebal lebih lebar, jadi pemenggalan barisnya ikut
                       // berubah dan seluruh teks di bawahnya bergeser tiap kali
@@ -505,9 +543,12 @@ class _PlayerPageState extends State<PlayerPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Ketuk teks untuk mode fokus',
-                            style: AppType.uiCaption
-                                .copyWith(color: warna.textDisabled)),
+                        Text(
+                          'Ketuk teks untuk mode fokus',
+                          style: AppType.uiCaption.copyWith(
+                            color: warna.textDisabled,
+                          ),
+                        ),
                         const SizedBox(width: 9),
                         Icon(Icons.close, size: 12, color: warna.textDisabled),
                       ],
@@ -540,7 +581,8 @@ class _PlayerPageState extends State<PlayerPage> {
       decoration: fokus
           ? null
           : BoxDecoration(
-              border: Border(top: BorderSide(color: warna.borderDefault))),
+              border: Border(top: BorderSide(color: warna.borderDefault)),
+            ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -554,17 +596,17 @@ class _PlayerPageState extends State<PlayerPage> {
             const SizedBox(height: 6),
             Row(
               children: [
-                Text('${player.index + 1} / ${player.sentences.length} kalimat',
-                    style: AppType.uiCaption
-                        .copyWith(color: warna.textSecondary)),
+                Text(
+                  '${player.index + 1} / ${player.sentences.length} kalimat',
+                  style: AppType.uiCaption.copyWith(color: warna.textSecondary),
+                ),
                 const Spacer(),
                 Text(
                   state.isNewContent
                       ? 'sisa ${state.remainingMinutes} menit'
                       : 'ulangan · bebas jatah',
                   key: const Key('quota-note'),
-                  style: AppType.uiCaption
-                      .copyWith(color: warna.textSecondary),
+                  style: AppType.uiCaption.copyWith(color: warna.textSecondary),
                 ),
               ],
             ),
@@ -584,21 +626,31 @@ class _PlayerPageState extends State<PlayerPage> {
               SizedBox(
                 width: AppSize.miniPlayer,
                 height: AppSize.miniPlayer,
-                child: FilledButton(
-                  key: const Key('play-toggle'),
-                  onPressed: player.toggle,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: fokus
-                        ? warna.bgSurfaceVariant
-                        : warna.playerControlBg,
-                    foregroundColor:
-                        fokus ? warna.textPrimary : warna.playerControlIcon,
-                    shape: const CircleBorder(),
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: Icon(
+                // Tombol terpenting di seluruh app sebelumnya tidak punya nama
+                // yang bisa dibaca pembaca layar — cuma ikon. Aksesibilitas
+                // salah satu klaim produk ini, jadi itu cacat sungguhan, bukan
+                // sekadar penyulit uji.
+                child: Semantics(
+                  button: true,
+                  label: player.isPlaying ? 'Jeda' : 'Putar',
+                  child: FilledButton(
+                    key: const Key('play-toggle'),
+                    onPressed: player.toggle,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: fokus
+                          ? warna.bgSurfaceVariant
+                          : warna.playerControlBg,
+                      foregroundColor: fokus
+                          ? warna.textPrimary
+                          : warna.playerControlIcon,
+                      shape: const CircleBorder(),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Icon(
                       player.isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 30),
+                      size: 30,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),

@@ -158,9 +158,16 @@ class NativeSpeechEngine implements SpeechEngine {
 
       // Jaring pengaman: kalau mesin TTS menelan callback selesainya, ucapan
       // tidak boleh menggantung selamanya dan mengunci seluruh bab.
-      final guardMs = (piece.length * 120 / (rate <= 0 ? 1 : rate))
-          .clamp(5000, 90000)
-          .toInt();
+      //
+      // SENGAJA longgar — tiga kali perkiraan, minimal lima belas detik.
+      // Selesai, batal, dan galat ketiganya sudah punya callback sendiri,
+      // jadi penjaga ini cuma untuk kejadian langka saat ketiganya hilang.
+      // Kalau ia menyalip callback yang sebenarnya masih akan datang, teks
+      // mendahului suara dan selisihnya menumpuk di tiap kalimat berikutnya —
+      // kerusakan yang tidak terlihat sebagai kerusakan. Kalau ia kelambatan,
+      // yang terjadi cuma jeda yang bisa ditekan ulang.
+      final perkiraan = piece.length * 120 / (rate <= 0 ? 1 : rate);
+      final guardMs = (perkiraan * 3).clamp(15000, 180000).toInt();
       Timer(Duration(milliseconds: guardMs), () {
         if (identical(_pending, completer) && !completer.isCompleted) _finish();
       });
